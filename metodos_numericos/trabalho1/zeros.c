@@ -8,6 +8,32 @@
 #define SAIR 5
 #define INVALIDA 6
 
+typedef struct entrada_iteracao_linear {
+  polinomio * fi;
+  double x0;
+} entrada_iteracao_linear;
+
+entrada_iteracao_linear * menu_iteracao_linear(polinomio * p){
+  double x0;
+  polinomio * fi = (polinomio *) malloc(sizeof(polinomio));
+  entrada_iteracao_linear * retorno = (entrada_iteracao_linear *) malloc(sizeof(entrada_iteracao_linear));
+
+  printf("[Método da Iteração Linear]\n\n");
+  printf("Forneça x[0]: ");
+  scanf("%lf",&x0);
+  printf("\nEntre com o polinômio φ (formato ax²+bx+c):\n\n");
+  printf("a: ");
+  scanf("%f",&fi->a);
+  printf("b: ");
+  scanf("%f",&fi->b);
+  printf("c: ");
+  scanf("%f",&fi->c);
+  printf("\n%s\n\n",formata_polinomio("φ",fi));
+  retorno->fi = fi;
+  retorno->x0 = x0;
+  return retorno;
+}
+
 polinomio * entrada_polinomio(void){
   polinomio * p = (polinomio *) malloc(sizeof(polinomio));
 
@@ -18,7 +44,7 @@ polinomio * entrada_polinomio(void){
   scanf("%f",&p->b);
   printf("c: ");
   scanf("%f",&p->c);
-  printf("\n%s\n\n",formata_polinomio(p));
+  printf("\n%s\n\n",formata_polinomio("f",p));
   return p;
 }
 
@@ -90,6 +116,7 @@ double * menu_secante(polinomio * p) {
 int main(void){
   polinomio * p;
   intervalo * i;
+  entrada_iteracao_linear * e;
   double raiz;
   double * x;
   unsigned int opcao;
@@ -103,6 +130,8 @@ int main(void){
         raiz = bisseccao(i,p);
         break;
       case ITERACAO_LINEAR:
+        e = menu_iteracao_linear(p);
+        raiz = iteracao_linear(e->x0,e->fi,p);
         break;
       case NEWTON_RAPHSON:
         x = menu_newton_raphson(p);
@@ -121,9 +150,9 @@ int main(void){
     }
     if ((opcao != SAIR) && (opcao != INVALIDA)){
       if (diferenca(raiz,(int)raiz)<ERRO)
-        printf("\nA raiz da equação %s é %d.\n\n",formata_polinomio(p),(int)raiz);
+        printf("\nA raiz da equação %s é %d.\n\n",formata_polinomio("f",p),(int)raiz);
       else
-        printf("\nA raiz da equação %s é %0.8lf.\n\n",formata_polinomio(p),raiz);
+        printf("\nA raiz da equação %s é %0.8lf.\n\n",formata_polinomio("f",p),raiz);
     }
   } while(opcao != SAIR);
   return 0;

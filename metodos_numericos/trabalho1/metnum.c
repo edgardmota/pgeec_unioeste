@@ -28,7 +28,7 @@ double diferenca(double a, double b){
   return fabs(a-b);
 }
 
-char * formata_polinomio(polinomio * p){
+char * formata_polinomio(char * nome, polinomio * p){
   char string_temporaria[40] = "";
   char * string_final;
   char buffer[10] = "";
@@ -88,7 +88,7 @@ char * formata_polinomio(polinomio * p){
   } else if ((diferenca(p->a,0)<ERRO) && (diferenca(p->b,0)<ERRO))
       strcpy(c,"0");
   strcat(c,buffer);
-  sprintf(string_temporaria,"f(x)=%s%s%s",a,b,c);
+  sprintf(string_temporaria,"%s(x)=%s%s%s",nome,a,b,c);
   string_final = (char *) malloc(strlen(string_temporaria)*sizeof(char));
   strcpy(string_final,string_temporaria);
   return string_final;
@@ -116,6 +116,25 @@ double bisseccao(intervalo * i, polinomio * p){
   } while(diferenca(i->a,i->b)>=ERRO);
   printf("----------------------------------");
   return m;
+}
+
+double iteracao_linear(double x0, polinomio * fi, polinomio * p){
+  double x;
+  double x_proximo;
+  unsigned int k=0;
+
+  x = x0;
+  x_proximo = x0;
+  printf("----------------------------------\n");
+  printf("k\tx[k]\t\tErro\n");
+  printf("----------------------------------\n");
+  do {
+    x = x_proximo;
+    x_proximo = resolve_polinomio(x,fi);
+    printf("%d\t%0.8lf\t%0.8lf\n",k,x,diferenca(x,x_proximo));
+    k++;
+  } while(diferenca(x,x_proximo)>=ERRO);
+  return x_proximo;
 }
 
 double newton_raphson(double x0, polinomio * p){

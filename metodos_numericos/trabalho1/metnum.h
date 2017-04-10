@@ -31,9 +31,11 @@ unsigned int bolzano(intervalo * i, polinomio * p);
 
 double diferenca(double a, double b);
 
-char * formata_polinomio(polinomio * p);
+char * formata_polinomio(char * nome, polinomio * p);
 
 double bisseccao(intervalo * i, polinomio * p);
+
+double iteracao_linear(double x0, polinomio * fi, polinomio * p);
 
 double newton_raphson(double x0, polinomio * p);
 
