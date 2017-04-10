@@ -104,7 +104,6 @@ double bisseccao(intervalo * i, polinomio * p){
   printf("----------------------------------\n");
   m = (i->a + i->b)/2;
   while (resolve_polinomio(m,p)>=ERRO){
-    i->a = i->a;
     aux = i->b;
     i->b = m;
     if(!bolzano(i,p)){
