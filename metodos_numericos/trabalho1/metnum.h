@@ -10,14 +10,6 @@
 #define TRUE 1
 #define FALSE 0
 
-//Opções do Menu
-#define BISSECCAO 1
-#define ITERACAO_LINEAR 2
-#define NEWTON_RAPHSON 3
-#define SECANTE 4
-#define SAIR 5
-#define INVALIDA 6
-
 #define ERRO 0.0001
 
 typedef struct polinomio {
