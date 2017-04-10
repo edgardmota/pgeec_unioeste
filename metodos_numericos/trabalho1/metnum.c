@@ -136,6 +136,7 @@ double iteracao_linear(double x0, polinomio * fi, polinomio * p){
     x = x_proximo;
     k++;
   }
+  printf("----------------------------------\n");
   return x_proximo;
 }
 
