@@ -6,11 +6,11 @@
 #include <math.h>
 #include <string.h>
 
+extern const double ERRO;
+
 //Constantes Booleanas
 #define TRUE 1
 #define FALSE 0
-
-#define ERRO 0.0001
 
 typedef struct polinomio {
   float a;
@@ -25,7 +25,7 @@ typedef struct intervalo {
 
 polinomio * derivada(polinomio * p);
 
-float resolve_polinomio(float x, polinomio * p);
+double resolve_polinomio(double x, polinomio * p);
 
 unsigned int bolzano(intervalo * i, polinomio * p);
 

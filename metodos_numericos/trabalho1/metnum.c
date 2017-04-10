@@ -1,5 +1,7 @@
 #include "metnum.h"
 
+const double ERRO = 0.0001;
+
 polinomio * derivada(polinomio * p){
   polinomio * d = (polinomio *) malloc(sizeof(polinomio));
 
@@ -10,8 +12,8 @@ polinomio * derivada(polinomio * p){
   return d;
 }
 
-float resolve_polinomio(float x, polinomio * p){
-  float resultado;
+double resolve_polinomio(double x, polinomio * p){
+  double resultado;
 
   resultado = p->a*pow(x,2)+p->b*x+p->c;
   return resultado;
@@ -99,22 +101,22 @@ double bisseccao(intervalo * i, polinomio * p){
   double aux;
   unsigned int k = 0;
 
-  printf("\n----------------------------------\n");
-  printf("k\tm\t\tDiferença\n");
-  printf("----------------------------------\n");
-  m = (i->a + i->b)/2;
-  while (resolve_polinomio(m,p)>=ERRO){
+  printf("\n----------------------------------------------------------------------------------\n");
+  printf("k\ta\t\tb\t\tm\t\tf(m)\t\tDiferença\n");
+  printf("----------------------------------------------------------------------------------\n");
+  m = (i->a + i->b)/2.0;
+  while (fabs(resolve_polinomio(m,p))>=ERRO){
+    printf("%d\t%0.8lf\t%0.8lf\t%0.8lf\t%0.8lf\t%0.8lf\n",k,i->a,i->b,m,resolve_polinomio(m,p),diferenca(i->a,i->b));
     aux = i->b;
     i->b = m;
     if(!bolzano(i,p)){
       i->a = m;
       i->b = aux;
     }
-    printf("%d\t%0.8lf\t%0.8lf\n",k,m,diferenca(i->a,i->b));
-    m = (i->a + i->b)/2;
+    m = (i->a + i->b)/2.0;
     k++;
   }
-  printf("----------------------------------");
+  printf("----------------------------------------------------------------------------------");
   return m;
 }
 
@@ -128,7 +130,7 @@ double iteracao_linear(double x0, polinomio * fi, polinomio * p){
   printf("----------------------------------\n");
   printf("k\tx[k]\t\tErro\n");
   printf("----------------------------------\n");
-  while (resolve_polinomio(x,p)>=ERRO){
+  while (fabs(resolve_polinomio(x,p))>=ERRO){
     x_proximo = resolve_polinomio(x,fi);
     printf("%d\t%0.8lf\t%0.8lf\n",k,x,diferenca(x,x_proximo));
     x = x_proximo;
@@ -148,7 +150,7 @@ double newton_raphson(double x0, polinomio * p){
   printf("\n----------------------------------\n");
   printf("k\tx[k]\t\tErro\n");
   printf("----------------------------------\n");
-  while (resolve_polinomio(x,p)>=ERRO){
+  while (fabs(resolve_polinomio(x,p))>=ERRO){
     x_proximo = x - (resolve_polinomio(x,p)/resolve_polinomio(x,d));
     printf("%d\t%0.8lf\t%0.8lf\n",k,x,diferenca(x,x_proximo));
     x = x_proximo;
@@ -169,7 +171,7 @@ double secante(double * x_s, polinomio * p){
   printf("\n----------------------------------\n");
   printf("k\tx[k]\t\tErro\n");
   printf("----------------------------------\n");
-  while (resolve_polinomio(x,p)>=ERRO){
+  while (fabs(resolve_polinomio(x,p))>=ERRO){
     aux = x;
     x = (x_anterior*resolve_polinomio(x,p)-x*resolve_polinomio(x_anterior,p))/(resolve_polinomio(x,p)-resolve_polinomio(x_anterior,p));
     printf("%d\t%0.8lf\t%0.8lf\n",k,x,diferenca(x,x_anterior));
