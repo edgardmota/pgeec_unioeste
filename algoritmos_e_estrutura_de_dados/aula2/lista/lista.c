@@ -27,7 +27,7 @@ no_estatico * busca_lista_estatica(int chave, lista_estatica * l){
 }
 
 unsigned int checa_posicao_valida_lista_estatica(int pos, lista_estatica * l){
-  return ((pos >= l->primeiro) && (pos < l->ultimo));
+  return (((pos == PRIMEIRO) && checa_vazia_lista_estatica(l)) || (pos >= l->primeiro) && (pos < l->ultimo));
 }
 
 unsigned int checa_cheia_lista_estatica(lista_estatica * l){
@@ -56,7 +56,7 @@ unsigned int desloca_elementos_lista_estatica(int pos, int direcao, lista_estati
 }
 
 unsigned int insere_lista_estatica(int chave, int pos, lista_estatica * l){
-  if(checa_vazia_lista_estatica(l) || ((!checa_cheia_lista_estatica(l)) && (checa_posicao_valida_lista_estatica(pos,l)))){
+  if((!checa_cheia_lista_estatica(l)) && (checa_posicao_valida_lista_estatica(pos,l))){
     desloca_elementos_lista_estatica(pos,ADIANTE,l);
     l->elementos[pos] = cria_no_estatico(chave);
     return TRUE;
