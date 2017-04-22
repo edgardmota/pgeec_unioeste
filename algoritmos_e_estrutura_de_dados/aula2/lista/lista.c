@@ -14,14 +14,14 @@ lista_estatica * cria_lista_estatica(){
 }
 
 no_estatico * busca_lista_estatica(int chave, lista_estatica * l){
-  int * i = (int *) malloc(sizeof(int));
+  int i;
   no_estatico * no = NULL;
 
-  *i = l->primeiro;
-  while((*i < l->ultimo) && (!no)){
-    if (l->elementos[*i]->chave == chave)
-      no = l->elementos[*i];
-    *i = *i + 1;
+  i = l->primeiro;
+  while((i < l->ultimo) && (!no)){
+    if (l->elementos[i]->chave == chave)
+      no = l->elementos[i];
+    i = i + 1;
   }
   return no;
 }
