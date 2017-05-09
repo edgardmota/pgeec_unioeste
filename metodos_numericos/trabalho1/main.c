@@ -113,7 +113,7 @@ double * menu_secante(polinomio * p) {
   return menu_newton_raphson_secante(SECANTE,p);
 }
 
-int main(void){
+void menu_zeros(void){
   polinomio * p;
   intervalo * i;
   entrada_iteracao_linear * e;
@@ -155,5 +155,62 @@ int main(void){
         printf("\nA raiz da equação %s é %0.8lf.\n\n",formata_polinomio("f",p),raiz);
     }
   } while(opcao != SAIR);
+}
+
+double * * menu_leitura_matriz(char * nome, unsigned int n, unsigned int m){
+  double * * matriz;
+  matriz = (double **) malloc(sizeof(double)*m);
+
+  printf("Forneça a Matriz %s:\n\n", nome);
+  for(unsigned int i = 0; i < m; i++){
+    matriz[i] = (double *) malloc(sizeof(double)*n);
+    for(unsigned int j = 0; j < n; j++){
+      printf("Entre com o elemento %s[%d][%d]: ", nome, i, j);
+      scanf("%lf", &matriz[i][j]);
+    }
+  }
+  return matriz;
+}
+
+void imprime_matriz(double * * matriz, unsigned int n, unsigned int m){
+  char tab;
+
+  for (unsigned int i = 0; i < n; i++) {
+    printf("|\t");
+    tab = '\t';
+    for(unsigned int j = 0; j < m; j++){
+      if((m-j)==1)
+        tab = '\0';
+      printf("%0.2lf%c", matriz[i][j],tab);
+      }
+    printf("\t|\n");
+  }
+  printf("\n");
+}
+
+void menu_sistemas_lineares(void){
+
+
+}
+
+int main(void){
+  double * * a;
+  double b[4];
+  double * x;
+  b[0] = 5;
+  b[1] = 6;
+  b[2] = 7;
+  b[3] = 15;
+  int n = 4;
+  int m = 4;
+  //menu_zeros();
+  a = menu_leitura_matriz("A",n,m);
+  imprime_matriz(a,n,m);
+  triangular_superior(a,b,n);
+  imprime_matriz(a,n,m);
+  x = gauss(a,b,n);
+  for(int i=0; i< n; i++){
+    printf("x[%d]=%f\n",i,x[i]);
+  }
   return 0;
 }

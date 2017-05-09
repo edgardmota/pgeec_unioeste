@@ -23,6 +23,14 @@ typedef struct intervalo {
   double b;
 } intervalo;
 
+int max_modulo_col(double * * a, unsigned int l, unsigned int c, unsigned int n);
+
+void troca_linhas(double * * a, double * b, unsigned int l1, unsigned int l2, unsigned int n);
+
+void triangular_superior(double * * a, double * b, unsigned int n);
+
+double * gauss(double * * a, double * b, unsigned int n);
+
 polinomio * derivada(polinomio * p);
 
 double resolve_polinomio(double x, polinomio * p);
