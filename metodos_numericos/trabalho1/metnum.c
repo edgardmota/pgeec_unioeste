@@ -4,8 +4,9 @@ const double ERRO = 0.0001;
 
 int max_modulo_col(double * * a, unsigned int l, unsigned int c, unsigned int n){
   unsigned int max = l;
+  int i;
 
-  for(int i = l+1; i < n; i++){
+  for(i = l+1; i < n; i++){
     if(fabs(a[i][c]) > fabs(a[max][c]))
       max = i;
   }
@@ -14,18 +15,18 @@ int max_modulo_col(double * * a, unsigned int l, unsigned int c, unsigned int n)
 
 void troca_linhas(double * * a, double * b, unsigned int l1, unsigned int l2, unsigned int n){
   double aux;
-  if(l1 != l2){ //Troca apenas se as linhas forem diferentes
-    for(int i = 0; i < n; i++){
+  int i;
+
+    for(i = 0; i < n; i++){
       aux = a[l1][i];
       a[l1][i] = a[l2][i];
       a[l2][i] = aux;
-      if(b){
-        aux = b[l1];
-        b[l1] = b[l2];
-        b[l2] = aux;
-      }
     }
-  }
+    if(b){
+      aux = b[l1];
+      b[l1] = b[l2];
+      b[l2] = aux;
+    }
 }
 
 void triangular_superior(double * * a, double * b, unsigned int n){
@@ -38,9 +39,10 @@ void triangular_superior(double * * a, double * b, unsigned int n){
 
   for(k = 0; k < n - 1; k++)
     for(i = k + 1; i < n; i++){
-      l2 = max_modulo_col(a,i,j,n);
-      printf("Maior linha: %d\n", l2 );
-      troca_linhas(a,b,l2,i,n);
+      l2 = max_modulo_col(a,i,k,n);
+      if (i != l2){
+        troca_linhas(a,b,l2,i,n);
+      }
       m = a[i][k]/a[k][k];
       a[i][k] = 0;
       for(j = k + 1; j < n; j++)
@@ -51,15 +53,15 @@ void triangular_superior(double * * a, double * b, unsigned int n){
 }
 
 double * gauss(double * * a, double * b, unsigned int n){
-  unsigned int k;
+  int k;
   unsigned int j;
   double s;
   double * x = (double *) malloc(n*sizeof(double));
 
   x[n-1] = b[n-1]/a[n-1][n-1];
-  for(k = n-2; k <= 0; k--){
+  for(k = n-2; k >= 0; k--){
     s = 0;
-    for(j = k + 1; k < n; k++)
+    for(j = k + 1; j < n; j++)
       s = s + a[k][j]*x[j];
     x[k] = (b[k] - s)/a[k][k];
   }

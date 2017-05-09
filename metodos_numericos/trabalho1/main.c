@@ -159,12 +159,14 @@ void menu_zeros(void){
 
 double * * menu_leitura_matriz(char * nome, unsigned int n, unsigned int m){
   double * * matriz;
+  unsigned int i;
+  unsigned int j;
   matriz = (double **) malloc(sizeof(double)*m);
 
   printf("Forneça a Matriz %s:\n\n", nome);
-  for(unsigned int i = 0; i < m; i++){
+  for(i = 0; i < m; i++){
     matriz[i] = (double *) malloc(sizeof(double)*n);
-    for(unsigned int j = 0; j < n; j++){
+    for(j = 0; j < n; j++){
       printf("Entre com o elemento %s[%d][%d]: ", nome, i, j);
       scanf("%lf", &matriz[i][j]);
     }
@@ -174,11 +176,13 @@ double * * menu_leitura_matriz(char * nome, unsigned int n, unsigned int m){
 
 void imprime_matriz(double * * matriz, unsigned int n, unsigned int m){
   char tab;
+  unsigned int i;
+  unsigned int j;
 
-  for (unsigned int i = 0; i < n; i++) {
+  for (i = 0; i < n; i++) {
     printf("|\t");
     tab = '\t';
-    for(unsigned int j = 0; j < m; j++){
+    for(j = 0; j < m; j++){
       if((m-j)==1)
         tab = '\0';
       printf("%0.2lf%c", matriz[i][j],tab);
@@ -188,28 +192,39 @@ void imprime_matriz(double * * matriz, unsigned int n, unsigned int m){
   printf("\n");
 }
 
+void imprime_vetor(double * vetor, unsigned int n){
+  unsigned int i;
+
+  for (i = 0; i < n; i++) {
+    printf("|\t%0.2lf\t|\n", vetor[i]);
+  }
+  printf("\n");
+}
+
+
 void menu_sistemas_lineares(void){
 
 
 }
 
 int main(void){
+  int i;
   double * * a;
-  double b[4];
+  double b[3];
   double * x;
-  b[0] = 5;
-  b[1] = 6;
-  b[2] = 7;
-  b[3] = 15;
-  int n = 4;
-  int m = 4;
+  b[0] = -1;
+  b[1] = 12;
+  b[2] = 0;
+  int n = 3;
+  int m = 3;
   //menu_zeros();
   a = menu_leitura_matriz("A",n,m);
   imprime_matriz(a,n,m);
   triangular_superior(a,b,n);
   imprime_matriz(a,n,m);
   x = gauss(a,b,n);
-  for(int i=0; i< n; i++){
+  imprime_vetor(b,n);
+  for(i =0; i< n; i++){
     printf("x[%d]=%f\n",i,x[i]);
   }
   return 0;
