@@ -7,6 +7,8 @@
 #include <string.h>
 
 extern const double ERRO;
+extern const int GAUSS_JACOBI;
+extern const int GAUSS_SEIDEL;
 
 //Constantes Booleanas
 #define TRUE 1
@@ -18,20 +20,55 @@ typedef struct polinomio {
   float c;
 } polinomio;
 
+typedef struct termo_nao_linear {
+  float constante;
+  float * expo_x;
+} termo_nao_linear;
+
 typedef struct intervalo {
   double a;
   double b;
 } intervalo;
 
-void L_U (double * * a, double * * l, double * * u, unsigned int n, unsigned int m);
+termo_nao_linear * * * jacobiana(termo_nao_linear * * * snl, unsigned int n);
+
+double * gauss_jacobi(double * * a, double * b, double * x0, unsigned int n);
+
+double * gauss_seidel(double * * a, double * b, double * x0, unsigned int n);
+
+double * gauss_jacobi_seidel(double * * a, double * b, double * x0, unsigned int n, int metodo);
+
+unsigned int convergiu(double * x1, double * x2, unsigned int n);
+
+double * vetor_zerado(unsigned int n);
+
+double * gauss_jacobi(double * * a, double * b, double * x0, unsigned int n);
+
+double * * transposta(double * * m, unsigned int n);
+
+double * eliminacao_gauss_cholesky(double * * a, double * b, unsigned int n);
+
+double * * cholesky (double * * a, unsigned int n);
+
+void copia_vetor(double * v1, double * v2, unsigned int n);
+
+double * * matriz_zerada(unsigned int n);
+
+void copia_matriz(double * * m1, double * * m2, unsigned int n);
+
+void L_U (double * * a, double * b, double * * l, double * * u, unsigned int n);
 
 int max_modulo_col(double * * a, unsigned int l, unsigned int c, unsigned int n);
 
 void troca_linhas(double * * a, double * b, unsigned int l1, unsigned int l2, unsigned int n);
 
-void triangular_superior(double * * a, double * b, unsigned int n);
+void triangular_superior(double * * a, double * b, unsigned int n, double * * l);
 
-double * gauss(double * * a, double * b, unsigned int n);
+double * eliminacao_gauss_L(double * * a, double * b, unsigned int n);
+
+double * eliminacao_gauss(double * * a, double * b, unsigned int n);
+
+double * eliminacao_gauss_L_U(double * * a, double * b, unsigned int n);
 
 polinomio * derivada(polinomio * p);
 

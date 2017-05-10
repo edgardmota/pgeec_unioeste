@@ -8,8 +8,6 @@
 #define SAIR 5
 #define INVALIDA 6
 
-#define TAMANHO_SISTEMA 2
-
 typedef struct entrada_iteracao_linear {
   polinomio * fi;
   double x0;
@@ -159,14 +157,14 @@ void menu_zeros(void){
   } while(opcao != SAIR);
 }
 
-double * * menu_leitura_matriz(char * nome, unsigned int n, unsigned int m){
+double * * menu_leitura_matriz(char * nome, unsigned int n){
   double * * matriz;
   unsigned int i;
   unsigned int j;
-  matriz = (double **) malloc(sizeof(double)*m);
+  matriz = (double **) malloc(sizeof(double)*n);
 
   printf("Forneça a Matriz '%s':\n\n", nome);
-  for(i = 0; i < m; i++){
+  for(i = 0; i < n; i++){
     matriz[i] = (double *) malloc(sizeof(double)*n);
     for(j = 0; j < n; j++){
       printf("Entre com o elemento %s[%d][%d]: ", nome, i, j);
@@ -182,7 +180,7 @@ double * menu_leitura_vetor(char * nome, unsigned int n){
   unsigned int i;
   vetor = (double *) malloc(sizeof(double)*n);
 
-  printf("Forneça o Vetor '%s':\n\n", nome);
+  printf("Forneça a Matriz '%s':\n\n", nome);
   for(i = 0; i < n; i++){
     printf("Entre com o elemento %s[%d]: ", nome, i);
     scanf("%lf", &vetor[i]);
@@ -191,7 +189,7 @@ double * menu_leitura_vetor(char * nome, unsigned int n){
   return vetor;
 }
 
-void imprime_matriz(char * nome, double * * matriz, unsigned int n, unsigned int m){
+void imprime_matriz(char * nome, double * * matriz, unsigned int n){
   char tab;
   unsigned int i;
   unsigned int j;
@@ -200,8 +198,8 @@ void imprime_matriz(char * nome, double * * matriz, unsigned int n, unsigned int
   for (i = 0; i < n; i++) {
     printf("\t|\t");
     tab = '\t';
-    for(j = 0; j < m; j++){
-      if((m-j)==1)
+    for(j = 0; j < n; j++){
+      if((n-j)==1)
         tab = '\0';
       printf("%0.2lf%c", matriz[i][j],tab);
       }
@@ -220,26 +218,49 @@ void imprime_vetor(char * nome, double * vetor, unsigned int n){
   printf("\n");
 }
 
-
 void menu_sistemas_lineares(void){
+  int i;
+  double * * a;
+  double * * l;
+  double * * u;
+  double * * g;
+  double * * gt;
+  double * b;
+  double * x;
+  double * x0;
+  int n;
 
+  printf("Entre com o tamanho do sistema: ");
+  scanf("%d", &n);
+  printf("\n");
+
+  a = menu_leitura_matriz("A",n);
+  b = menu_leitura_vetor("b",n);
+
+  //ELIMINAÇÃO DE GAUSS LU
+  // imprime_vetor("x",eliminacao_gauss_L_U(a,b,n),n);
+
+  //GAUSS-JACOBI E GAUSS-SEIDEL
+  // x0 = menu_leitura_vetor("x0",n);
+  // x=gauss_seidel(a,b,x0,n);
+  // imprime_vetor("x",x,n);
+  // x=gauss_jacobi(a,b,x0,n);
+  // imprime_vetor("x",x,n);
+
+  //CHOLESKY
+  // imprime_vetor("x",eliminacao_gauss_cholesky(a,b,n),n);
+
+  //ELIMINAÇÃO DE GAUSS
+  // triangular_superior(a,b,n,NULL);
+  // x = eliminacao_gauss(a,b,n);
+  // imprime_matriz("A",a,n);
+  // imprime_vetor("b",b,n);
+  // imprime_vetor("x",x,n);
 
 }
 
 int main(void){
-  int i;
-  double * * a;
-  double * b;
-  double * x;
-  int n = TAMANHO_SISTEMA;
-  int m = TAMANHO_SISTEMA;
-  //menu_zeros();
-  a = menu_leitura_matriz("A",n,m);
-  b = menu_leitura_vetor("b",n);
-  triangular_superior(a,b,n);
-  x = gauss(a,b,n);
-  imprime_matriz("A",a,n,m);
-  imprime_vetor("b",b,n);
-  imprime_vetor("x",x,n);
+  // menu_zeros();
+  menu_sistemas_lineares();
   return 0;
 }

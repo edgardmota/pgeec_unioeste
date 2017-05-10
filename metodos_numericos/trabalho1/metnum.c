@@ -1,6 +1,146 @@
 #include "metnum.h"
 
 const double ERRO = 0.0001;
+const int GAUSS_JACOBI = 0;
+const int GAUSS_SEIDEL = 1;
+
+double * gauss_jacobi(double * * a, double * b, double * x0, unsigned int n){
+  return gauss_jacobi_seidel(a,b,x0,n,GAUSS_JACOBI);
+}
+
+double * gauss_seidel(double * * a, double * b, double * x0, unsigned int n){
+  return gauss_jacobi_seidel(a,b,x0,n,GAUSS_SEIDEL);
+}
+
+double * gauss_jacobi_seidel(double * * a, double * b, double * x0, unsigned int n, int metodo){
+  int i;
+  int j;
+  double * x = vetor_zerado(n);
+  double * x_proximo = vetor_zerado(n);
+  double c;
+  int k = -1;
+
+  copia_vetor(x0,x_proximo,n);
+  do {
+    k++;
+    copia_vetor(x_proximo,x,n);
+    for(i = 0; i < n; i++){
+      x_proximo[i] = 1/a[i][i];
+      c = b[i];
+      for(j = 0; j < n; j++)
+        if(j!=i){
+          if((j>i)||(metodo == GAUSS_JACOBI))
+            c -= a[i][j]*x[j];
+          else
+            c -= a[i][j]*x_proximo[j];
+        }
+      x_proximo[i] *= c;
+    }
+  } while(!convergiu(x,x_proximo,n));
+  printf("Convergiu em %d iterações.\n",k);
+  return x_proximo;
+}
+
+unsigned int convergiu(double * x1, double * x2, unsigned int n){
+  int i;
+  double dif;
+  double maior = diferenca(x1[0],x2[0]);
+  for(i = 1; i < n; i++){
+    dif = diferenca(x1[i],x2[i]);
+    if(dif>maior)
+      maior=dif;
+  }
+  return maior<=ERRO;
+}
+
+double * vetor_zerado(unsigned int n){
+  int i;
+  double * v = (double *) malloc(sizeof(double)*n);
+
+  for(i = 0; i < n; i++)
+    v[i] = 0;
+  return v;
+}
+
+double * * matriz_zerada(unsigned int n){
+  int i;
+  int j;
+  double * * m = (double * *) malloc(sizeof(double)*n);
+
+  for(i = 0; i < n; i++){
+    m[i] = (double *) malloc(sizeof(double)*n);
+    for(j = 0; j < n; j++)
+      m[i][j] = 0;
+    }
+  return m;
+}
+
+void copia_vetor(double * v1, double * v2, unsigned int n){
+  int i;
+
+  for(i = 0; i < n; i++)
+    v2[i] = v1[i];
+}
+
+void copia_matriz(double * * m1, double * * m2, unsigned int n){
+  int i;
+  int j;
+
+  for(i = 0; i < n; i++)
+    for(j = 0; j < n; j++)
+      m2[i][j] = m1[i][j];
+}
+
+double * * transposta(double * * m, unsigned int n){
+  int i;
+  int j;
+  double * * t = matriz_zerada(n);
+
+  for(i = 0; i < n; i++)
+    for(j = 0; j < n; j++)
+      t[j][i] = m[i][j];
+  return t;
+}
+
+double * * cholesky (double * * a, unsigned int n){
+  int k;
+  int i;
+  int j;
+  double soma;
+  double * * g = matriz_zerada(n);
+
+  copia_matriz(a,g,n);
+  for(k = 0; k < n; k++){
+    for(i = 0; i < k; i++){
+        soma = 0;
+        for(j = 0; j < i; j++)
+          soma += g[i][j] * g[k][j];
+        g[k][i] = (g[k][i] - soma)/g[i][i];
+    }
+    soma = 0;
+    for(j = 0; j < k; j++)
+      soma += pow(g[i][j],2);
+    g[k][k] = sqrt(g[k][k] - soma);
+  }
+  for(k = 0; k < n; k++)
+      for(i = k+1; i < n; i++)
+        g[k][i] = 0;
+  return g;
+}
+
+void L_U (double * * a, double * b, double * * l, double * * u, unsigned int n){
+  int i;
+  int j;
+
+  for(i = 0; i < n; i++){
+    l[i][i] = 1;
+    for(j = i+1; j < n; j++)
+      l[i][j] = 0;
+  }
+  copia_matriz(a,u,n);
+  triangular_superior(u,b,n,l);
+}
+
 
 int max_modulo_col(double * * a, unsigned int l, unsigned int c, unsigned int n){
   unsigned int max = l;
@@ -29,7 +169,7 @@ void troca_linhas(double * * a, double * b, unsigned int l1, unsigned int l2, un
     }
 }
 
-void triangular_superior(double * * a, double * b, unsigned int n){
+void triangular_superior(double * * a, double * b, unsigned int n, double * * l){
   unsigned int k;
   unsigned int i;
   unsigned int j;
@@ -40,23 +180,39 @@ void triangular_superior(double * * a, double * b, unsigned int n){
   for(k = 0; k < n - 1; k++)
     for(i = k + 1; i < n; i++){
       l2 = max_modulo_col(a,i,k,n);
-      if (i != l2){
+      if (i != l2)
         troca_linhas(a,b,l2,i,n);
-      }
       m = a[i][k]/a[k][k];
+      if(l)
+        l[i][k] = m;
       a[i][k] = 0;
       for(j = k + 1; j < n; j++)
         a[i][j] = a[i][j] - m*a[k][j];
-      if (b)
+      if ((b) && (!l))
         b[i] = b[i] - m*b[k];
     }
 }
 
-double * gauss(double * * a, double * b, unsigned int n){
+double * eliminacao_gauss_L(double * * a, double * b, unsigned int n){
+  int i;
+  int j;
+  double s;
+  double * x = vetor_zerado(n);
+
+  for(i = 0; i < n; i++){
+    s = 0;
+    for(j = 0; j <= i - 1; j++)
+      s = s + a[i][j]*x[j];
+    x[i] = (b[i] - s)/a[i][i];
+  }
+  return x;
+}
+
+double * eliminacao_gauss(double * * a, double * b, unsigned int n){
   int k;
   unsigned int j;
   double s;
-  double * x = (double *) malloc(n*sizeof(double));
+  double * x = vetor_zerado(n);
 
   x[n-1] = b[n-1]/a[n-1][n-1];
   for(k = n-2; k >= 0; k--){
@@ -66,6 +222,25 @@ double * gauss(double * * a, double * b, unsigned int n){
     x[k] = (b[k] - s)/a[k][k];
   }
   return x;
+}
+
+double * eliminacao_gauss_cholesky(double * * a, double * b, unsigned int n){
+    double * * g;
+    double * * gt;
+    double * y;
+    g = cholesky(a,n);
+    gt = transposta(g,n);
+    y = eliminacao_gauss_L(g,b,n);
+    return eliminacao_gauss(gt,y,n);
+}
+
+double * eliminacao_gauss_L_U(double * * a, double * b, unsigned int n){
+    double * * l = matriz_zerada(n);
+    double * * u = matriz_zerada(n);
+    double * y;
+    L_U(a,b,l,u,n);
+    y = eliminacao_gauss_L(l,b,n);
+    return eliminacao_gauss(u,y,n);
 }
 
 polinomio * derivada(polinomio * p){
