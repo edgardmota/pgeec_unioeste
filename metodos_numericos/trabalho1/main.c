@@ -8,6 +8,8 @@
 #define SAIR 5
 #define INVALIDA 6
 
+#define TAMANHO_SISTEMA 2
+
 typedef struct entrada_iteracao_linear {
   polinomio * fi;
   double x0;
@@ -163,7 +165,7 @@ double * * menu_leitura_matriz(char * nome, unsigned int n, unsigned int m){
   unsigned int j;
   matriz = (double **) malloc(sizeof(double)*m);
 
-  printf("Forneça a Matriz %s:\n\n", nome);
+  printf("Forneça a Matriz '%s':\n\n", nome);
   for(i = 0; i < m; i++){
     matriz[i] = (double *) malloc(sizeof(double)*n);
     for(j = 0; j < n; j++){
@@ -171,16 +173,32 @@ double * * menu_leitura_matriz(char * nome, unsigned int n, unsigned int m){
       scanf("%lf", &matriz[i][j]);
     }
   }
+  printf("\n");
   return matriz;
 }
 
-void imprime_matriz(double * * matriz, unsigned int n, unsigned int m){
+double * menu_leitura_vetor(char * nome, unsigned int n){
+  double * vetor;
+  unsigned int i;
+  vetor = (double *) malloc(sizeof(double)*n);
+
+  printf("Forneça o Vetor '%s':\n\n", nome);
+  for(i = 0; i < n; i++){
+    printf("Entre com o elemento %s[%d]: ", nome, i);
+    scanf("%lf", &vetor[i]);
+  }
+  printf("\n");
+  return vetor;
+}
+
+void imprime_matriz(char * nome, double * * matriz, unsigned int n, unsigned int m){
   char tab;
   unsigned int i;
   unsigned int j;
 
+  printf("%s =", nome);
   for (i = 0; i < n; i++) {
-    printf("|\t");
+    printf("\t|\t");
     tab = '\t';
     for(j = 0; j < m; j++){
       if((m-j)==1)
@@ -192,11 +210,12 @@ void imprime_matriz(double * * matriz, unsigned int n, unsigned int m){
   printf("\n");
 }
 
-void imprime_vetor(double * vetor, unsigned int n){
+void imprime_vetor(char * nome, double * vetor, unsigned int n){
   unsigned int i;
 
+  printf("%s =", nome);
   for (i = 0; i < n; i++) {
-    printf("|\t%0.2lf\t|\n", vetor[i]);
+    printf("\t|\t%0.2lf\t|\n", vetor[i]);
   }
   printf("\n");
 }
@@ -210,22 +229,17 @@ void menu_sistemas_lineares(void){
 int main(void){
   int i;
   double * * a;
-  double b[3];
+  double * b;
   double * x;
-  b[0] = -1;
-  b[1] = 12;
-  b[2] = 0;
-  int n = 3;
-  int m = 3;
+  int n = TAMANHO_SISTEMA;
+  int m = TAMANHO_SISTEMA;
   //menu_zeros();
   a = menu_leitura_matriz("A",n,m);
-  imprime_matriz(a,n,m);
+  b = menu_leitura_vetor("b",n);
   triangular_superior(a,b,n);
-  imprime_matriz(a,n,m);
   x = gauss(a,b,n);
-  imprime_vetor(b,n);
-  for(i =0; i< n; i++){
-    printf("x[%d]=%f\n",i,x[i]);
-  }
+  imprime_matriz("A",a,n,m);
+  imprime_vetor("b",b,n);
+  imprime_vetor("x",x,n);
   return 0;
 }

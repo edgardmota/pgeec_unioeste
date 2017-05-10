@@ -23,6 +23,8 @@ typedef struct intervalo {
   double b;
 } intervalo;
 
+void L_U (double * * a, double * * l, double * * u, unsigned int n, unsigned int m);
+
 int max_modulo_col(double * * a, unsigned int l, unsigned int c, unsigned int n);
 
 void troca_linhas(double * * a, double * b, unsigned int l1, unsigned int l2, unsigned int n);
