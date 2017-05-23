@@ -1,5 +1,7 @@
 #include "lista.h"
 
+//Lista com Estrutura Estática
+
 no_estatico * cria_no_estatico(int chave){
   no_estatico * n = (no_estatico *) malloc(sizeof(no_estatico));
   n->chave = chave;
@@ -85,3 +87,99 @@ void imprime_lista_estatica(lista_estatica * l){
       printf("\n");
   }
 }
+
+//Lista Dinâmica
+
+no * cria_no(int chave){
+  no * n = (no *) malloc(sizeof(no));
+  n->chave = chave;
+  return n;
+}
+
+lista * cria_lista(){
+  return (lista *) malloc(sizeof(lista));
+}
+
+unsigned int checa_vazia_lista(lista *){
+  return ((l->cabeca == l->cauda) && (l->cabeca == NULL));
+}
+
+no * proximo(no * n){
+  no * prox = NULL;
+  if (no != NULL)
+    prox = n->proximo;
+  return prox;
+}
+
+unsigned int checa_posicao_valida_lista(int pos, lista * l){
+  no * atual;
+
+  if(pos >= 0){
+      atual = lista->cabeca;
+      while((atual != NULL) && (pos >= 0)){
+        atual = proximo(atual);
+        pos--;
+      }
+      if(pos <= 0)
+        return TRUE;
+      else
+        return FALSE;
+  }
+  else
+    return FALSE;
+}
+
+no * busca_lista(int chave, lista * l){
+  no * atual = l->cabeca;
+  no * buscado = NULL;
+
+  while((atual != NULL) && (buscado != NULL)){
+    if(atual->chave == chave)
+      buscado = atual;
+    else
+      atual = proximo(atual);
+  }
+  return buscado;
+}
+
+void imprime_lista(lista * l){
+  no * atual;
+  if(checa_vazia_lista(l))
+    printf("Lista vazia!\n");
+  else{
+    atual = l->cabeca;
+    while(atual != NULL){
+      printf("%d ", atual->chave);
+      atual = proximo(atual);
+    }
+  printf("\n");
+  }
+}
+
+unsigned int insere_lista(int chave, int pos, lista * ){
+  no * aux;
+  no * atual;
+
+  if((checa_posicao_valida_lista(pos,l)){
+    if (pos == 0){
+      aux = lista->cabeca;
+      lista->cabeca = cria_no(chave);
+      lista->cabeca->proximo = aux;
+    }
+    else{
+      atual = lista->cabeca;
+      while(pos-1){
+        atual = proximo(atual);
+        pos--;
+      }
+      aux = cria_no(chave);
+      aux->proximo = atual->proximo;
+      atual->proximo = aux;
+    }
+    return TRUE;
+  }
+  else
+    return FALSE;
+}
+
+no * remove_lista(int pos, lista * );

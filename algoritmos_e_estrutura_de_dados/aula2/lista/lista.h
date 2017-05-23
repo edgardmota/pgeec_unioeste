@@ -7,6 +7,8 @@
 #define TRUE 1
 #define FALSE 0
 
+//Lista com Estrutura Estática
+
 #define ADIANTE 1
 #define PARA_TRAS -1
 
@@ -33,5 +35,27 @@ void imprime_lista_estatica(lista_estatica * l);
 unsigned int desloca_elementos_lista_estatica(int pos, int direcao, lista_estatica * l);
 unsigned int insere_lista_estatica(int chave, int pos, lista_estatica * );
 no_estatico * remove_lista_estatica(int pos, lista_estatica * );
+
+//Lista Dinâmica
+
+typedef struct no {
+  int chave;
+  struct no * proximo;
+} no;
+
+typedef struct lista {
+  no * cabeca;
+  no * cauda;
+} lista;
+
+no * cria_no(int chave);
+lista * cria_lista();
+unsigned int checa_vazia_lista(lista *);
+unsigned int checa_posicao_valida_lista(int pos, lista * l);
+no * busca_lista(int chave, lista * l);
+void imprime_lista(lista * l);
+unsigned int insere_lista(int chave, int pos, lista * );
+no * proximo(no * n);
+no * remove_lista(int pos, lista * );
 
 #endif
