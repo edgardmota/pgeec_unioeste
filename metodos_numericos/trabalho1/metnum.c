@@ -1,8 +1,43 @@
 #include "metnum.h"
 
 const double ERRO = 0.0001;
-const int GAUSS_JACOBI = 0;
-const int GAUSS_SEIDEL = 1;
+
+void arruma_linhas(double * * a, unsigned int n){
+  int i;
+  int j;
+  int * maiores = (int *) malloc(sizeof(int)*n);
+
+  for(i = 0; i < n; i++)
+    maiores[i] = 0;
+  for(j = 0; j < n ; j++){
+    for(int i = 0; i < n; i++){
+      if(a[i][j]>a[maiores[i]][j])
+        maiores[i]=i;
+    }
+  }
+  for(i = 0; i < n; i++)
+    troca_linhas(a,NULL,i,maiores[i],n);
+  return;
+}
+
+int criterio_linhas(double * * a, unsigned int n){
+  // int i;
+  // int j;
+  // int s;
+  // int falhou = FALSE;
+  //
+  // for(i = 0; (i < n) && (!falhou); i++){
+  //   s = 0;
+  //   for(j = 0; j < n; j++){
+  //     if(j!=i){
+  //       s += a[i][j];
+  //     }
+  //   }
+  //   if(s>a[i][i])
+  //     falhou = TRUE;
+  //   }
+  return TRUE;
+}
 
 double * gauss_jacobi(double * * a, double * b, double * x0, unsigned int n){
   return gauss_jacobi_seidel(a,b,x0,n,GAUSS_JACOBI);
@@ -131,6 +166,7 @@ double * * cholesky (double * * a, unsigned int n){
 void L_U (double * * a, double * b, double * * l, double * * u, unsigned int n){
   int i;
   int j;
+  double * copia_b = vetor_zerado(n);
 
   for(i = 0; i < n; i++){
     l[i][i] = 1;
@@ -138,7 +174,8 @@ void L_U (double * * a, double * b, double * * l, double * * u, unsigned int n){
       l[i][j] = 0;
   }
   copia_matriz(a,u,n);
-  triangular_superior(u,b,n,l);
+  copia_vetor(b,copia_b,n);
+  triangular_superior(u,copia_b,n,l);
 }
 
 
@@ -209,17 +246,16 @@ double * eliminacao_gauss_L(double * * a, double * b, unsigned int n){
 }
 
 double * eliminacao_gauss(double * * a, double * b, unsigned int n){
-  int k;
-  unsigned int j;
+  int i;
+  int j;
   double s;
   double * x = vetor_zerado(n);
 
-  x[n-1] = b[n-1]/a[n-1][n-1];
-  for(k = n-2; k >= 0; k--){
+  for(i = n-1; i >=0; i--){
     s = 0;
-    for(j = k + 1; j < n; j++)
-      s = s + a[k][j]*x[j];
-    x[k] = (b[k] - s)/a[k][k];
+    for(j = i + 1; j < n; j++)
+      s = s + a[i][j]*x[j];
+    x[i] = (b[i] - s)/a[i][i];
   }
   return x;
 }

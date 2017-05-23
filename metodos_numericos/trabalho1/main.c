@@ -1,12 +1,22 @@
 #include "metnum.h"
+//Opções Menu Principal
+#define MENU_RAIZES 1
+#define MENU_SISTEMAS_LINEARES 2
 
-//Opções do Menu
+//Opções do Menu de Raizes
 #define BISSECCAO 1
 #define ITERACAO_LINEAR 2
 #define NEWTON_RAPHSON 3
 #define SECANTE 4
-#define SAIR 5
-#define INVALIDA 6
+
+//Opções do Menu de Sistemas Lineares
+#define ELIMINACAO_GAUSS 1
+#define ELIMINACAO_GAUSS_L_U 2
+#define ELIMINACAO_GAUSS_CHOLESKY 3
+
+//Opcoes Gerais
+#define SAIR 10
+#define INVALIDA 11
 
 typedef struct entrada_iteracao_linear {
   polinomio * fi;
@@ -66,7 +76,7 @@ intervalo * menu_bisseccao(polinomio * p) {
   return i;
 }
 
-unsigned int menu_principal(void){
+unsigned int menu_raizes(void){
   unsigned int opcao;
 
   printf("Escolha o método numérico para obtenção de raízes OU sair:\n\n");
@@ -123,7 +133,7 @@ void menu_zeros(void){
 
   p = entrada_polinomio();
   do {
-    opcao = menu_principal();
+    opcao = menu_raizes();
     switch(opcao){
       case BISSECCAO:
         i = menu_bisseccao(p);
@@ -218,17 +228,37 @@ void imprime_vetor(char * nome, double * vetor, unsigned int n){
   printf("\n");
 }
 
+unsigned int menu_escolha_metodo_lineares(void){
+  unsigned int opcao;
+
+  printf("Escolha o método resolução de sistema linear OU sair:\n\n");
+  printf("(%d) Método da Eliminação de Gauss;\n",ELIMINACAO_GAUSS);
+  printf("(%d) Método da Eliminação de Gauss (LU);\n",ELIMINACAO_GAUSS_L_U);
+  printf("(%d) Método da Eliminação de Gauss (Cholesky);\n",ELIMINACAO_GAUSS_CHOLESKY);
+  printf("(%d) Método da Gauss-Jacobi;\n",GAUSS_JACOBI);
+  printf("(%d) Método da Gauss-Seidel;\n",GAUSS_SEIDEL);
+  printf("(%d) Sair.\n\n",SAIR);
+  printf("Opção: ");
+  scanf("%d",&opcao);
+  printf("\n");
+  return opcao;
+}
+
 void menu_sistemas_lineares(void){
   int i;
   double * * a;
+  double * * copia_a;
   double * * l;
   double * * u;
   double * * g;
   double * * gt;
   double * b;
+  double * copia_b;
   double * x;
   double * x0;
   int n;
+  unsigned int opcao;
+  int falhou;
 
   printf("Entre com o tamanho do sistema: ");
   scanf("%d", &n);
@@ -236,31 +266,94 @@ void menu_sistemas_lineares(void){
 
   a = menu_leitura_matriz("A",n);
   b = menu_leitura_vetor("b",n);
-
-  //ELIMINAÇÃO DE GAUSS LU
-  // imprime_vetor("x",eliminacao_gauss_L_U(a,b,n),n);
-
-  //GAUSS-JACOBI E GAUSS-SEIDEL
-  // x0 = menu_leitura_vetor("x0",n);
-  // x=gauss_seidel(a,b,x0,n);
-  // imprime_vetor("x",x,n);
-  // x=gauss_jacobi(a,b,x0,n);
-  // imprime_vetor("x",x,n);
-
-  //CHOLESKY
-  // imprime_vetor("x",eliminacao_gauss_cholesky(a,b,n),n);
-
-  //ELIMINAÇÃO DE GAUSS
-  // triangular_superior(a,b,n,NULL);
-  // x = eliminacao_gauss(a,b,n);
-  // imprime_matriz("A",a,n);
-  // imprime_vetor("b",b,n);
-  // imprime_vetor("x",x,n);
-
+  do {
+    falhou = FALSE;
+    imprime_matriz("A",a,n);
+    imprime_vetor("b",b,n);
+    opcao = menu_escolha_metodo_lineares();
+    switch(opcao){
+      case ELIMINACAO_GAUSS:
+        copia_a = matriz_zerada(n);
+        copia_b = vetor_zerado(n);
+        copia_matriz(a,copia_a,n);
+        copia_vetor(b,copia_b,n);
+        triangular_superior(copia_a,copia_b,n,NULL);
+        x = eliminacao_gauss(copia_a,copia_b,n);
+        free(copia_a);
+        free(copia_b);
+        break;
+      case ELIMINACAO_GAUSS_L_U:
+        x = eliminacao_gauss_L_U(a,b,n);
+        break;
+      case ELIMINACAO_GAUSS_CHOLESKY:
+        x = eliminacao_gauss_cholesky(a,b,n);
+        break;
+      case GAUSS_SEIDEL:
+      case GAUSS_JACOBI:
+        copia_a = matriz_zerada(n);
+        copia_matriz(a,copia_a,n);
+        if(!criterio_linhas(copia_a,n)){
+          arruma_linhas(copia_a,n);
+        }
+        if(!criterio_linhas(copia_a,n)){
+          printf("Problema de convergência identificado pelo método das linhas!\n\n");
+          falhou = TRUE;
+        }
+        else {
+          x0 = menu_leitura_vetor("x0",n);
+          switch (opcao) {
+            case GAUSS_SEIDEL:
+              x = gauss_seidel(copia_a,b,x0,n);
+              break;
+            default:
+              x = gauss_jacobi(copia_a,b,x0,n);
+              break;
+          }
+          free(x0);
+        }
+        free(copia_a);
+        break;
+      case SAIR:
+        break;
+      default:
+        opcao = INVALIDA;
+        printf("Método inválido\n\n");
+        break;
+    }
+    if ((opcao != SAIR) && (opcao != INVALIDA)&& (!falhou)){
+      printf("Solução:\n\n");
+      imprime_vetor("x",x,n);
+      printf("Sistema Original:\n\n");
+      free(x);
+    }
+  } while(opcao != SAIR);
 }
 
 int main(void){
-  // menu_zeros();
-  menu_sistemas_lineares();
+  unsigned int opcao;
+
+  do {
+    printf("\nEscolha uma opção:\n\n");
+    printf("(%d) Calculo de raízes;\n", MENU_RAIZES);
+    printf("(%d) Sistemas Lineares;\n", MENU_SISTEMAS_LINEARES);
+    printf("(%d) Sair.\n\n",SAIR);
+    printf("Opção: ");
+    scanf("%d", &opcao);
+    printf("\n");
+    switch(opcao){
+      case MENU_RAIZES:
+        menu_zeros();
+        break;
+      case MENU_SISTEMAS_LINEARES:
+        menu_sistemas_lineares();
+        break;
+      case SAIR:
+        break;
+      default:
+        opcao = INVALIDA;
+        printf("Opção inválida\n\n");
+        break;
+    }
+  } while(opcao != SAIR);
   return 0;
 }

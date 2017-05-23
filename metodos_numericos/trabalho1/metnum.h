@@ -7,8 +7,8 @@
 #include <string.h>
 
 extern const double ERRO;
-extern const int GAUSS_JACOBI;
-extern const int GAUSS_SEIDEL;
+#define GAUSS_JACOBI 4
+#define GAUSS_SEIDEL 5
 
 //Constantes Booleanas
 #define TRUE 1
@@ -31,6 +31,10 @@ typedef struct intervalo {
 } intervalo;
 
 termo_nao_linear * * * jacobiana(termo_nao_linear * * * snl, unsigned int n);
+
+void arruma_linhas(double * * a, unsigned int n);
+
+int criterio_linhas(double * * a, unsigned int n);
 
 double * gauss_jacobi(double * * a, double * b, double * x0, unsigned int n);
 
