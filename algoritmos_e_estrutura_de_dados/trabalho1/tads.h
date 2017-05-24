@@ -52,14 +52,19 @@ typedef struct Salas {
 
 //Funções de Apoio
 Elemento * cria_elemento(void * conteudo);
+
+//Pilha
 Pilha * cria_pilha(void);
 Elemento * pop(Pilha * pilha);
 void push(void * conteudo, Pilha * pilha);
 int pilha_vazia(Pilha * pilha);
+
+//Fila
 Fila * cria_fila(void);
 Elemento * out(Fila * fila);
 void in(void * conteudo, Fila * fila);
 int fila_vazia(Fila * fila);
+
 //Funcionalidades da Bliblioteca
 void inicializa(char * nome_arquivo, Estante * estantes);
 int inserir_livro(Livro * livro, Estante * estantes);
