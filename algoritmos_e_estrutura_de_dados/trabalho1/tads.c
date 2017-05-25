@@ -1,93 +1,85 @@
 #include "tads.h"
 
-Elemento * cria_elemento(void * conteudo){
+Elemento * criar_elemento(void * conteudo){
   Elemento * e = (Elemento *) malloc(sizeof(Elemento));
   e->conteudo = conteudo;
   e->proximo = NULL;
   return e;
 }
 
-Pilha * cria_pilha(void){
-  Pilha * pilha = (Pilha *) malloc(sizeof(Pilha));
-  Elemento * cabeca = cria_elemento(NULL);
-  pilha->cabeca = cabeca;
-  pilha->topo = cabeca;
-  pilha->tamanho = 0;
-  return pilha;
+
+int vazia(Lista * lista){
+  return !lista->tamanho;
 }
 
-
-int pilha_vazia(Pilha * pilha){
-  return (pilha->topo == pilha->cabeca);
+Lista * criar_lista(void){
+  Lista * lista = (Lista *) malloc(sizeof(Lista));
+  Elemento * cabeca = criar_elemento(NULL);
+  lista->cabeca = cabeca;
+  lista->tamanho = 0;
+  return lista;
 }
 
-Elemento * pop(Pilha * pilha){
-  void * conteudo;
-  Elemento * liberar;
-  if(!pilha_vazia(pilha)){
-    conteudo = pilha->topo->conteudo;
-    liberar = pilha->cabeca;
-    pilha->cabeca = pilha->cabeca->proximo;
-    pilha->topo = pilha->topo->proximo;
-    pilha->tamanho--;
-    free(liberar);
-    return cria_elemento(conteudo);
+int inserir(void * conteudo, int posicao, Lista * lista){
+  Elemento * e;
+  Elemento * atual;
+
+  if(posicao <= lista->tamanho){
+      e = criar_elemento(conteudo);
+      atual = lista->cabeca;
+      while(posicao){
+        atual = atual->proximo;
+        posicao--;
+      }
+      e->proximo = atual->proximo;
+      atual->proximo = e;
+      lista->tamanho++;
+      return TRUE;
   }
   else
-    return NULL;
+    return FALSE;
 }
 
-void push(void * conteudo, Pilha * pilha){
-   Elemento * e = cria_elemento(conteudo);
-   pilha->topo = e;
-   e->proximo = pilha->cabeca->proximo;
-   pilha->cabeca->proximo = e;
-   pilha->tamanho++;
-}
+void * remover(int posicao, Lista * lista){
+  void * removido = (void*) malloc(sizeof(void));
+  Elemento * anterior;
+  Elemento * atual;
 
-int fila_vazia(Fila * fila){
-  return ((fila->primeiro == fila->cabeca) && (fila->ultimo == fila->cabeca));
-}
-
-Fila * cria_fila(void){
-  Fila * fila = (Fila *) malloc(sizeof(Fila));
-  Elemento * cabeca = cria_elemento(NULL);
-  fila->cabeca = cabeca;
-  fila->primeiro = cabeca;
-  fila->ultimo = cabeca;
-  fila->tamanho = 0;
-  return fila;
-}
-
-void in(void * conteudo, Fila * fila){
-  Elemento * e = cria_elemento(conteudo);
-  fila->tamanho++;
-  if(fila_vazia(fila)){
-    fila->primeiro = e;
-    fila->ultimo = e;
-    fila->cabeca->proximo = e;
-  }
-  else{
-    fila->ultimo->proximo = e;
-    fila->ultimo = e;
-  }
-}
-
-Elemento * out(Fila * fila){
-  void * conteudo;
-  Elemento * liberar;
-  if(!fila_vazia(fila)){
-    fila->tamanho--;
-    conteudo = fila->primeiro->conteudo;
-    liberar = fila->cabeca;
-    fila->cabeca = fila->cabeca->proximo;
-    if(fila->tamanho == 0)
-        fila->primeiro = fila->cabeca;
+  if(!vazia(lista)){
+    if(posicao < lista->tamanho){
+      anterior = lista->cabeca;
+      atual = anterior->proximo;
+      while(posicao){
+        anterior = anterior->proximo;
+        atual = atual->proximo;
+        posicao--;
+      }
+      anterior->proximo = atual->proximo;
+      *(int*)removido = *(int*)atual->conteudo;
+      free(atual);
+      lista->tamanho--;
+      return removido;
+    }
     else
-        fila->primeiro = fila->primeiro->proximo;
-    free(liberar);
-    return cria_elemento(conteudo);
+      return NULL;
   }
   else
     return NULL;
+}
+
+
+void in(void * conteudo, Lista * fila){
+  inserir(conteudo,0,fila);
+}
+
+void * out(Lista * fila){
+  return remover(fila->tamanho-1,fila);
+}
+
+void * pop(Lista * pilha){
+  return remover(0,pilha);
+}
+
+void push(void * conteudo, Lista * pilha){
+  inserir(conteudo,0,pilha);
 }

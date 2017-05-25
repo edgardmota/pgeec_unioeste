@@ -6,8 +6,8 @@ int main(void){
   int i;
   int j;
   int * n = (int *) malloc(sizeof(int)*TAMANHO);
-  Fila * fila = cria_fila();
-  Pilha * pilha = cria_pilha();
+  Lista * fila = criar_lista();
+  Lista * pilha = criar_lista();
   Elemento * removido;
 
   for(i = 0;i < TAMANHO; i++){
@@ -22,7 +22,7 @@ int main(void){
         push(&n[i],pilha);
     }
     for(i = 0;i < TAMANHO; i++){
-        printf("Removendo elemento %d...\n",*(int*)pop(pilha)->conteudo);
+        printf("Removendo elemento %d...\n",*(int*)pop(pilha));
     }
   }
   //Fila\:
@@ -33,7 +33,7 @@ int main(void){
         in(&n[i],fila);
     }
     for(i = 0;i < TAMANHO; i++){
-        printf("Removendo elemento %d...\n",*(int*)out(fila)->conteudo);
+        printf("Removendo elemento %d...\n",*(int*)out(fila));
     }
   }
   return 0;

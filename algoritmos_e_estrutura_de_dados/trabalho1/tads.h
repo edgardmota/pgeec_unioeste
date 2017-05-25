@@ -16,63 +16,52 @@ typedef struct livro {
   Endereco_livro endereco;
 } Livro;
 
-typedef struct estante {
-  int numero;
-  Livro * prateleira;
-} Estante;
-
 typedef struct elemento {
   void * conteudo;
   struct elemento * proximo;
 } Elemento;
 
-typedef struct pilha {
+typedef struct lista {
   Elemento * cabeca;
-  Elemento * topo;
   int tamanho;
-} Pilha;
-
-typedef struct fila {
-  Elemento * cabeca;
-  Elemento * primeiro;
-  Elemento * ultimo;
-  int tamanho;
-} Fila;
+} Lista;
 
 typedef struct sala {
   int ra;
-  Pilha * pilha;
+  Lista * pilha;
 } Sala;
 
 typedef struct Salas {
-  Pilha * salas_livres;
-  Pilha * salas_ocupadas;
-  Fila * fila;
+  Lista * salas_livres;
+  Lista * salas_ocupadas;
+  Lista * fila_espera;
 } Salas;
 
 //Funções de Apoio
-Elemento * cria_elemento(void * conteudo);
+Elemento * criar_elemento(void * conteudo);
+
+//Lista
+Lista * criar_lista(void);
+int vazia(Lista * lista);
+int inserir(void * conteudo, int posicao, Lista * lista);
+void * remover(int posicao, Lista * lista);
 
 //Pilha
-Pilha * cria_pilha(void);
-Elemento * pop(Pilha * pilha);
-void push(void * conteudo, Pilha * pilha);
-int pilha_vazia(Pilha * pilha);
+void * pop(Lista * pilha);
+void push(void * conteudo, Lista * pilha);
 
 //Fila
-Fila * cria_fila(void);
-Elemento * out(Fila * fila);
-void in(void * conteudo, Fila * fila);
-int fila_vazia(Fila * fila);
+void * out(Lista * fila);
+void in(void * conteudo, Lista * fila);
 
 //Funcionalidades da Bliblioteca
-void inicializa(char * nome_arquivo, Estante * estantes);
-int inserir_livro(Livro * livro, Estante * estantes);
-Livro * retirar_livro(int codigo, Estante * estantes, Salas * salas);
-Endereco_livro * buscar_endereco_livro(int codigo, Estante * estantes);
+void inicializar(char * nome_arquivo, Lista * estantes);
+int inserir_livro(Livro * livro, Lista * estantes);
+Livro * retirar_livro(int codigo, Lista * estantes, Salas * salas);
+Endereco_livro * buscar_endereco_livro(int codigo, Lista * estantes);
 int locar_sala(int ra, Sala * salas); //Falta o retorno
-int emprestar_livro(int ra, int codigo, Estante * estantes, Sala * salas);
-int liberar_sala(int ra, Sala * salas, Estante * estantes);
-void imprimir_mapa_de_estantes(Estante * estantes);
+int emprestar_livro(int ra, int codigo, Lista * estantes, Sala * salas);
+int liberar_sala(int ra, Sala * salas, Lista * estantes);
+void imprimir_mapa_de_estantes(Lista * estantes);
 void imprimir_mapa_de_salas(Sala * salas);
 void imprimir_fila_de_espera_de_sala(Sala * salas);
