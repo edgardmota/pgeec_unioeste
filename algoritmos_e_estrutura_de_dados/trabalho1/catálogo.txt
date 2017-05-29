@@ -3,7 +3,7 @@ P0
 10, Memórias Póstumas de Brás Cubas, Machado de Assis
 13, O Discurso do Método, René Descartes
 P1
-5, Assim falava Zaratrustura, Friedrich Nietzche
+5, Assim falava Zaratustra, Friedrich Nietzche
 7, O Hobbit, J. R. R. Tolkien
 8, Ulisses, James Joyce
 P2
@@ -34,7 +34,7 @@ P4
 84, O Cortiço, Aluísio de Azevedo
 E3
 P0
-200, O Tempo e o Vento, Érico Veríssimo
+200, O Tempo e o Vento, rico Veríssimo
 P1
 700, O Quinze, Raquel de Queiroz
 710, Feliz Ano Velho, Marcelo Rubens Paiva

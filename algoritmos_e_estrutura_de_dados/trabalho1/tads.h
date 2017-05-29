@@ -14,6 +14,8 @@
 #define MODO_LEITURA_ESTANTE 1
 #define MODO_LEITURA_LIVRO 2
 
+#define NUMERO_CAMPOS_TEXTO_LIVRO 3
+
 typedef struct endereco_livro {
   int estante;
   int prateleira;

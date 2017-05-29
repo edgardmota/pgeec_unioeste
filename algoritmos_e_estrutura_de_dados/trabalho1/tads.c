@@ -88,43 +88,44 @@ void liberar(Lista * lista){
 }
 
 Livro * criar_livro(Lista * buffer_linha){
+  char * campos[NUMERO_CAMPOS_TEXTO_LIVRO];
   Livro * livro = (Livro *) malloc(sizeof(Livro));
+  int i;
+
   char * c = (char *) malloc(sizeof(char));
   char * buffer = (char *) malloc(sizeof(char));
 
-  strcpy(c,"");
-  strcpy(buffer,"");
-  do { // Leitura do Código do Livro
-    strcat(buffer,c);
-    c = out(buffer_linha);
-  } while (*c != ',');
-  out(buffer_linha); // Descarta espaço
-  livro->codigo = atoi(buffer);
-
-  strcpy(c,"");
-  strcpy(buffer,"");
-  do { // Leitura do Título do Livro
-    strcat(buffer,c);
-    c = out(buffer_linha);
-  } while (*c != ',');
-  out(buffer_linha); // Descarta espaço
-  strcpy(livro->titulo,buffer);
-
-  strcat(buffer,c);
-  strcpy(buffer,"");
-  do { // Leitura do Autor do Livro
-    strcat(buffer,c);
-    c = out(buffer_linha);
-  } while (c != NULL);
-  strcpy(livro->titulo,buffer);
+  for(i = 0; i < NUMERO_CAMPOS_TEXTO_LIVRO; i++){
+    strcpy(c,"");
+    strcpy(buffer,"");
+    do { // Leitura do Código do Livro
+      strcat(buffer,c);
+      c = out(buffer_linha);
+    } while ((c != NULL) && (*c != ','));
+    out(buffer_linha); // Descarta espaço
+    if(i == 0)
+      livro->codigo = atoi(buffer);
+    else{
+      campos[i-1] = (char *) malloc(sizeof(char)*strlen(buffer));
+      strcpy(campos[i-1],buffer);
+    }
+  }
+  livro->titulo = campos[0];
+  livro->autor = campos[1];
 
   return livro;
+}
+
+char * duplicar_char(char * c){
+  char * duplicado = (char *) malloc(sizeof(char));
+  *duplicado = *c;
+  return duplicado;
 }
 
 Lista * inicializar(char * nome_arquivo){
   FILE * arquivo;
 
-  Lista * estantes;
+  Lista * estantes = criar_lista();
   Lista * prateleiras = criar_lista();
   Lista * livros = criar_lista();
   Lista * buffer_linha = criar_lista();
@@ -153,12 +154,12 @@ Lista * inicializar(char * nome_arquivo){
           livros = criar_lista();
           break;
       }
-      in(buffer_caracter,buffer_linha);
+      in(duplicar_char(buffer_caracter),buffer_linha);
     }
     else {// Meio da linha
       if(*buffer_caracter != MARCADOR_EOL) {
           if(modo_leitura == MODO_LEITURA_LIVRO)
-            in(buffer_caracter,buffer_linha);
+            in(duplicar_char(buffer_caracter),buffer_linha);
       }
       else{ // Fim de leitura da linha
         switch (modo_leitura) {
@@ -167,7 +168,7 @@ Lista * inicializar(char * nome_arquivo){
             break;
           case MODO_LEITURA_LIVRO:
             livro = criar_livro(buffer_linha);
-            printf(livro->titulo);
+            printf("%s\n",livro->titulo);
             push(livro,livros);
             break;
         }
