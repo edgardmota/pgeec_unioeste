@@ -7,7 +7,6 @@ Elemento * criar_elemento(void * conteudo){
   return e;
 }
 
-
 int vazia(Lista * lista){
   return !lista->tamanho;
 }
@@ -82,4 +81,100 @@ void * pop(Lista * pilha){
 
 void push(void * conteudo, Lista * pilha){
   inserir(conteudo,0,pilha);
+}
+
+void liberar(Lista * lista){
+  while(pop(lista));
+}
+
+Livro * criar_livro(Lista * buffer_linha){
+  Livro * livro = (Livro *) malloc(sizeof(Livro));
+  char * c = (char *) malloc(sizeof(char));
+  char * buffer = (char *) malloc(sizeof(char));
+
+  strcpy(c,"");
+  strcpy(buffer,"");
+  do { // Leitura do Código do Livro
+    strcat(buffer,c);
+    c = out(buffer_linha);
+  } while (*c != ',');
+  out(buffer_linha); // Descarta espaço
+  livro->codigo = atoi(buffer);
+
+  strcpy(c,"");
+  strcpy(buffer,"");
+  do { // Leitura do Título do Livro
+    strcat(buffer,c);
+    c = out(buffer_linha);
+  } while (*c != ',');
+  out(buffer_linha); // Descarta espaço
+  strcpy(livro->titulo,buffer);
+
+  strcat(buffer,c);
+  strcpy(buffer,"");
+  do { // Leitura do Autor do Livro
+    strcat(buffer,c);
+    c = out(buffer_linha);
+  } while (c != NULL);
+  strcpy(livro->titulo,buffer);
+
+  return livro;
+}
+
+Lista * inicializar(char * nome_arquivo){
+  FILE * arquivo;
+
+  Lista * estantes;
+  Lista * prateleiras = criar_lista();
+  Lista * livros = criar_lista();
+  Lista * buffer_linha = criar_lista();
+
+  Lista * elemento_lido;
+  int bytes_lidos;
+  char * buffer_caracter = (char *) malloc(sizeof(char));
+  Livro * livro;
+  int modo_leitura;
+
+  arquivo = fopen(nome_arquivo,MODO_ABERTURA);
+  do {
+    bytes_lidos = fread(buffer_caracter,TAMANHO_LEITURA,UNIDADES_LEITURA,arquivo);
+    if(vazia(buffer_linha)){ // Começo da linha
+      switch (*buffer_caracter) {
+        case 'E': // Leitura da Estante
+          modo_leitura = MODO_LEITURA_ESTANTE;
+          break;
+        case 'P': // Leitura da Prateleira
+          modo_leitura = MODO_LEITURA_PRATELEIRA;
+          prateleiras = criar_lista();
+          push(estantes,prateleiras);
+          break;
+        default: // Leitura do Livro
+          modo_leitura = MODO_LEITURA_LIVRO;
+          livros = criar_lista();
+          break;
+      }
+      in(buffer_caracter,buffer_linha);
+    }
+    else {// Meio da linha
+      if(*buffer_caracter != MARCADOR_EOL) {
+          if(modo_leitura == MODO_LEITURA_LIVRO)
+            in(buffer_caracter,buffer_linha);
+      }
+      else{ // Fim de leitura da linha
+        switch (modo_leitura) {
+          case MODO_LEITURA_ESTANTE:
+          case MODO_LEITURA_PRATELEIRA:
+            break;
+          case MODO_LEITURA_LIVRO:
+            livro = criar_livro(buffer_linha);
+            printf(livro->titulo);
+            push(livro,livros);
+            break;
+        }
+        liberar(buffer_linha);
+        buffer_linha = criar_lista();
+      }
+    }
+  } while (bytes_lidos != 0);
+  return estantes;
 }

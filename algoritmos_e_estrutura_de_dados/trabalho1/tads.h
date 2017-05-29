@@ -1,8 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define TRUE 1
 #define FALSE 0
+
+#define MODO_ABERTURA "r+b"
+#define MARCADOR_EOL '\n'
+#define TAMANHO_LEITURA 1
+#define UNIDADES_LEITURA 1
+
+#define MODO_LEITURA_PRATELEIRA 0
+#define MODO_LEITURA_ESTANTE 1
+#define MODO_LEITURA_LIVRO 2
 
 typedef struct endereco_livro {
   int estante;
@@ -54,8 +64,10 @@ void push(void * conteudo, Lista * pilha);
 void * out(Lista * fila);
 void in(void * conteudo, Lista * fila);
 
-//Funcionalidades da Bliblioteca
-void inicializar(char * nome_arquivo, Lista * estantes);
+//Funcionalidades da Biblioteca
+char * monta_buffer_caracter(char caracter);
+
+Lista * inicializar(char * nome_arquivo);
 int inserir_livro(Livro * livro, Lista * estantes);
 Livro * retirar_livro(int codigo, Lista * estantes, Salas * salas);
 Endereco_livro * buscar_endereco_livro(int codigo, Lista * estantes);
