@@ -10,10 +10,6 @@
 #define TAMANHO_LEITURA 1
 #define UNIDADES_LEITURA 1
 
-#define MODO_LEITURA_PRATELEIRA 0
-#define MODO_LEITURA_ESTANTE 1
-#define MODO_LEITURA_LIVRO 2
-
 #define NUMERO_CAMPOS_TEXTO_LIVRO 3
 
 typedef struct endereco_livro {

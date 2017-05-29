@@ -22,6 +22,7 @@ Lista * criar_lista(void){
 int inserir(void * conteudo, int posicao, Lista * lista){
   Elemento * e;
   Elemento * atual;
+  int inseriu = FALSE;
 
   if(posicao <= lista->tamanho){
       e = criar_elemento(conteudo);
@@ -33,14 +34,13 @@ int inserir(void * conteudo, int posicao, Lista * lista){
       e->proximo = atual->proximo;
       atual->proximo = e;
       lista->tamanho++;
-      return TRUE;
+      inseriu = TRUE;
   }
-  else
-    return FALSE;
+  return inseriu;
 }
 
 void * remover(int posicao, Lista * lista){
-  void * removido = (void*) malloc(sizeof(void));
+  void * removido = NULL;
   Elemento * anterior;
   Elemento * atual;
 
@@ -54,16 +54,13 @@ void * remover(int posicao, Lista * lista){
         posicao--;
       }
       anterior->proximo = atual->proximo;
+      removido = (void*) malloc(sizeof(void));
       *(int*)removido = *(int*)atual->conteudo;
       free(atual);
       lista->tamanho--;
-      return removido;
     }
-    else
-      return NULL;
   }
-  else
-    return NULL;
+  return removido;
 }
 
 
@@ -92,16 +89,16 @@ Livro * criar_livro(Lista * buffer_linha){
   Livro * livro = (Livro *) malloc(sizeof(Livro));
   int i;
 
-  char * c = (char *) malloc(sizeof(char));
+  char * caracter = (char *) malloc(sizeof(char));
   char * buffer = (char *) malloc(sizeof(char));
 
   for(i = 0; i < NUMERO_CAMPOS_TEXTO_LIVRO; i++){
-    strcpy(c,"");
+    strcpy(caracter,"");
     strcpy(buffer,"");
     do { // Leitura do Código do Livro
-      strcat(buffer,c);
-      c = out(buffer_linha);
-    } while ((c != NULL) && (*c != ','));
+      strcat(buffer,caracter);
+      caracter = out(buffer_linha);
+    } while ((caracter != NULL) && (*caracter != ','));
     out(buffer_linha); // Descarta espaço
     if(i == 0)
       livro->codigo = atoi(buffer);
@@ -125,48 +122,45 @@ char * duplicar_char(char * c){
 Lista * inicializar(char * nome_arquivo){
   FILE * arquivo;
 
+  Lista * leitura_estantes = criar_lista();
   Lista * estantes = criar_lista();
+
+  Lista * leitura_prateleiras = criar_lista();
   Lista * prateleiras = criar_lista();
+
+  Lista * leitura_livros = criar_lista();
   Lista * livros = criar_lista();
+
   Lista * buffer_linha = criar_lista();
 
   Lista * elemento_lido;
   int bytes_lidos;
-  char * buffer_caracter = (char *) malloc(sizeof(char));
+  char * caracter = (char *) malloc(sizeof(char));
   Livro * livro;
   int modo_leitura;
 
   arquivo = fopen(nome_arquivo,MODO_ABERTURA);
   do {
-    bytes_lidos = fread(buffer_caracter,TAMANHO_LEITURA,UNIDADES_LEITURA,arquivo);
+    bytes_lidos = fread(caracter,TAMANHO_LEITURA,UNIDADES_LEITURA,arquivo);
     if(vazia(buffer_linha)){ // Começo da linha
-      switch (*buffer_caracter) {
+      switch (*caracter) {
         case 'E': // Leitura da Estante
-          modo_leitura = MODO_LEITURA_ESTANTE;
+          push(caracter,leitura_estantes);
           break;
         case 'P': // Leitura da Prateleira
-          modo_leitura = MODO_LEITURA_PRATELEIRA;
-          prateleiras = criar_lista();
-          push(estantes,prateleiras);
+          push(caracter,leitura_prateleiras);
           break;
         default: // Leitura do Livro
-          modo_leitura = MODO_LEITURA_LIVRO;
-          livros = criar_lista();
+          push(caracter,leitura_livros);
           break;
       }
-      in(duplicar_char(buffer_caracter),buffer_linha);
+      in(duplicar_char(caracter),buffer_linha);
     }
     else {// Meio da linha
-      if(*buffer_caracter != MARCADOR_EOL) {
-          if(modo_leitura == MODO_LEITURA_LIVRO)
-            in(duplicar_char(buffer_caracter),buffer_linha);
+      if(*caracter != MARCADOR_EOL) {
+          in(duplicar_char(caracter),buffer_linha);
       }
       else{ // Fim de leitura da linha
-        switch (modo_leitura) {
-          case MODO_LEITURA_ESTANTE:
-          case MODO_LEITURA_PRATELEIRA:
-            break;
-          case MODO_LEITURA_LIVRO:
             livro = criar_livro(buffer_linha);
             printf("%s\n",livro->titulo);
             push(livro,livros);
