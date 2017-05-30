@@ -84,7 +84,7 @@ void liberar(Lista * lista){
   while(pop(lista));
 }
 
-Livro * criar_livro(Lista * buffer_linha){
+Livro * criar_livro(Lista * buffer_linha, int n_estante, int n_prateleira){
   char * campos[NUMERO_CAMPOS_TEXTO_LIVRO];
   Livro * livro = (Livro *) malloc(sizeof(Livro));
   int i;
@@ -109,6 +109,8 @@ Livro * criar_livro(Lista * buffer_linha){
   }
   livro->titulo = campos[0];
   livro->autor = campos[1];
+  livro->endereco.estante = n_estante;
+  livro->endereco.prateleira = n_prateleira;
 
   return livro;
 }
@@ -122,50 +124,72 @@ char * duplicar_char(char * c){
 Lista * inicializar(char * nome_arquivo){
   FILE * arquivo;
 
-  Lista * leitura_estantes = criar_lista();
   Lista * estantes = criar_lista();
+  Lista * estante_atual;
+  int n_estante;
 
-  Lista * leitura_prateleiras = criar_lista();
   Lista * prateleiras = criar_lista();
+  Lista * prateleira_atual;
+  int n_prateleira;
 
-  Lista * leitura_livros = criar_lista();
   Lista * livros = criar_lista();
+  Lista * leitura_livros = criar_lista();
+  Livro * livro;
 
   Lista * buffer_linha = criar_lista();
-
   Lista * elemento_lido;
   int bytes_lidos;
   char * caracter = (char *) malloc(sizeof(char));
-  Livro * livro;
-  int modo_leitura;
 
   arquivo = fopen(nome_arquivo,MODO_ABERTURA);
-  do {
+  do{
     bytes_lidos = fread(caracter,TAMANHO_LEITURA,UNIDADES_LEITURA,arquivo);
     if(vazia(buffer_linha)){ // Começo da linha
-      switch (*caracter) {
+      switch (*caracter){
         case 'E': // Leitura da Estante
-          push(caracter,leitura_estantes);
+          if(!vazia(leitura_livros)){ //Se houverem livros empilhados
+
+            prateleira_atual = prateleiras->cabeca;
+            n_prateleira = *((int)pop(prateleira_atual));
+
+            estante_atual = estantes->cabeca;
+            n_estante = *((int)pop(estante_atual))
+
+            livro = pop(leitura_livros);
+            while (livro){
+                push(criar_livro(livro,n_estante,n_prateleira),prateleira_atual);
+                livro = pop(leitura_livros);
+            }
+            push(prateleira_atual,estante_atual);
+          }
+          push(NULL,estantes);
+          elemento_lido = leitura_estantes;
           break;
         case 'P': // Leitura da Prateleira
-          push(caracter,leitura_prateleiras);
+          if(!vazia(leitura_livros)){ //Se houverem livros empilhados
+
+            prateleira_atual = prateleiras->cabeca;
+            n_prateleira = *((int)pop(prateleira_atual));
+
+            livro = pop(leitura_livros);
+            while (livro){
+                push(criar_livro(livro,n_estante,n_prateleira),prateleira_atual);
+                livro = pop(leitura_livros);
+            }
+          }
+          elemento_lido = leitura_prateleiras;
           break;
         default: // Leitura do Livro
-          push(caracter,leitura_livros);
+          elemento_lido = leitura_livros;
           break;
       }
       in(duplicar_char(caracter),buffer_linha);
     }
     else {// Meio da linha
       if(*caracter != MARCADOR_EOL) {
-          in(duplicar_char(caracter),buffer_linha);
+        in(duplicar_char(caracter),buffer_linha);
       }
       else{ // Fim de leitura da linha
-            livro = criar_livro(buffer_linha);
-            printf("%s\n",livro->titulo);
-            push(livro,livros);
-            break;
-        }
         liberar(buffer_linha);
         buffer_linha = criar_lista();
       }
