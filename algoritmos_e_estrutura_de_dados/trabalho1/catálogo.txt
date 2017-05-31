@@ -34,7 +34,7 @@ P4
 84, O Cortiço, Aluísio de Azevedo
 E3
 P0
-200, O Tempo e o Vento, rico Veríssimo
+200, O Tempo e o Vento, Érico Veríssimo
 P1
 700, O Quinze, Raquel de Queiroz
 710, Feliz Ano Velho, Marcelo Rubens Paiva

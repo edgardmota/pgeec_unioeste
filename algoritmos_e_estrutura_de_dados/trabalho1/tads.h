@@ -12,6 +12,16 @@
 
 #define NUMERO_CAMPOS_TEXTO_LIVRO 3
 
+#define ESTANTE 0
+#define PRATELEIRA 1
+#define LIVROS 2
+
+//Eventos
+
+#define EMPRESTIMO_LIVRO 0
+#define LOCACAO_SALA 1
+#define LIBERAR_SALA 2
+
 typedef struct endereco_livro {
   int estante;
   int prateleira;
@@ -63,7 +73,9 @@ void * out(Lista * fila);
 void in(void * conteudo, Lista * fila);
 
 //Funcionalidades da Biblioteca
-char * monta_buffer_caracter(char caracter);
+void * processar_linha(Lista * buffer_linha);
+int * fila_para_numero(Lista * fila);
+char * duplicar_char(char * c);
 
 Lista * inicializar(char * nome_arquivo);
 int inserir_livro(Livro * livro, Lista * estantes);

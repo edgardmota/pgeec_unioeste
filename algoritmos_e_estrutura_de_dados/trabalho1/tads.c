@@ -65,11 +65,13 @@ void * remover(int posicao, Lista * lista){
 
 
 void in(void * conteudo, Lista * fila){
-  inserir(conteudo,0,fila);
+  //inserir(conteudo,0,fila);
+  inserir(conteudo,fila->tamanho,fila);
 }
 
 void * out(Lista * fila){
-  return remover(fila->tamanho-1,fila);
+  //return remover(fila->tamanho-1,fila);
+  return remover(0,fila);
 }
 
 void * pop(Lista * pilha){
@@ -84,34 +86,54 @@ void liberar(Lista * lista){
   while(pop(lista));
 }
 
-Livro * criar_livro(Lista * buffer_linha, int n_estante, int n_prateleira){
-  char * campos[NUMERO_CAMPOS_TEXTO_LIVRO];
-  Livro * livro = (Livro *) malloc(sizeof(Livro));
-  int i;
+Elemento * get(int posicao, Lista * lista){
+  Elemento * atual;
+  Elemento * retornado = NULL;
 
-  char * caracter = (char *) malloc(sizeof(char));
-  char * buffer = (char *) malloc(sizeof(char));
-
-  for(i = 0; i < NUMERO_CAMPOS_TEXTO_LIVRO; i++){
-    strcpy(caracter,"");
-    strcpy(buffer,"");
-    do { // Leitura do Código do Livro
-      strcat(buffer,caracter);
-      caracter = out(buffer_linha);
-    } while ((caracter != NULL) && (*caracter != ','));
-    out(buffer_linha); // Descarta espaço
-    if(i == 0)
-      livro->codigo = atoi(buffer);
-    else{
-      campos[i-1] = (char *) malloc(sizeof(char)*strlen(buffer));
-      strcpy(campos[i-1],buffer);
+  if((!vazia(lista)) && (posicao < lista->tamanho)){
+    atual = lista->cabeca->proximo;
+    while(posicao){
+      atual = atual->proximo;
+      posicao--;
     }
+    retornado = atual;
   }
-  livro->titulo = campos[0];
-  livro->autor = campos[1];
-  livro->endereco.estante = n_estante;
-  livro->endereco.prateleira = n_prateleira;
+  return retornado;
+}
 
+Elemento * topo(Lista * lista){
+  return get(0,lista);
+}
+
+Livro * criar_livro(Lista * buffer_linha){
+  int i;
+  char * campos[NUMERO_CAMPOS_TEXTO_LIVRO];
+  Livro * livro = NULL;
+  char * caracter;
+  char * buffer;
+
+  if(buffer_linha){
+    Livro = (Livro *) malloc(sizeof(Livro));
+    caracter = (char *) malloc(sizeof(char));
+    buffer = (char *) malloc(sizeof(char));
+    for(i = 0; i < NUMERO_CAMPOS_TEXTO_LIVRO; i++){
+      strcpy(caracter,"");
+      strcpy(buffer,"");
+      do {
+        strcat(buffer,caracter);
+        caracter = out(buffer_linha);
+      } while ((caracter != NULL) && (*caracter != ','));
+      out(buffer_linha); // Descarta espaços
+      if(i == 0)// Armazena o código
+        livro->codigo = atoi(buffer);
+      else{// Processa campos texto
+        campos[i-1] = (char *) malloc(sizeof(char)*strlen(buffer));
+        strcpy(campos[i-1],buffer);
+      }
+    }
+    livro->titulo = campos[0];
+    livro->autor = campos[1];
+  }
   return livro;
 }
 
@@ -121,25 +143,115 @@ char * duplicar_char(char * c){
   return duplicado;
 }
 
-Lista * inicializar(char * nome_arquivo){
-  FILE * arquivo;
+int * fila_para_numero(Lista * fila){
+  int * numero = (int *) malloc(sizeof(int));
+  char * buffer = (char *) malloc(sizeof(char)*fila->tamanho);
+  char * caracter;
 
-  Lista * estantes = criar_lista();
-  Lista * estante_atual;
+  caracter = out(fila);
+  do{
+    strcat(buffer,caracter);
+    caracter = out(fila);
+  } while (caracter != NULL);
+  *numero = atoi(buffer);
+  return numero;
+}
+
+void * formatar(Lista * buffer_linha){
+  char * caracter;
+
+  caracter = topo(buffer_linha)->conteudo;
+  switch (*caracter){
+    case 'E':
+    case 'P':
+      out(buffer_linha); // descarta prefixo E ou P
+      return fila_para_numero(buffer_linha);
+      break;
+    default:
+      return criar_livro(buffer_linha);
+      break;
+  }
+}
+
+int algo_pendente(Lista * pendentes){
+  return (!vazio(pendentes[ESTANTE]) || !vazio(pendentes[PRATELEIRA]) || !vazio(pendentes[LIVROS]));
+}
+
+void processar(Lista * pendentes, int novo_lido, Lista * estantes){
+  Lista * prateleira;
+  Lista * prateleiras;
+  int n_prateleira;
   int n_estante;
 
-  Lista * prateleiras = criar_lista();
-  Lista * prateleira_atual;
-  int n_prateleira;
+  if(algo_pendente(pendentes)){
+    prateleiras = criar_lista();
+    n_estante = *(int *)pop(abertos[ESTANTE]);
+    switch (novo_lido) {
+      case ESTANTE:
+        if(!vazio(pendentes[LIVROS])){
+          n_prateleira = *(int *)pop(pendentes[PRATELEIRA]);
+          prateleira = criar_lista();
+          while(!vazio(pendentes[LIVROS])){
+              pop(pendentes[LIVROS]);
+          }
+        }
+          if(!vazia(pendentes[PRATELEIRA])){ //Prateleiras pendentes de processamento
+            prateleira = pop(pendentes[PRATELEIRA]);
+            while(prateleira){
+              push(prateleira,prateleiras);
+              prateleira = pop(pendentes[PRATELEIRA]);
+            }
+          }
+          prateleira = criar_lista();
+          livro = criar_livro(pop(pendentes[LIVROS]));
+          while(livro){
+            push(livro,prateleira);
+            livro = criar_livro(pop(pendentes[LIVROS]));
+          }
+        } else if(!vazio(pendentes[PRATELEIRA])){
 
-  Lista * livros = criar_lista();
-  Lista * leitura_livros = criar_lista();
+        } else {
+        }
+        break;
+      case PRATELEIRA:
+        if(!vazio(pendentes[LIVROS])){
+          n_estante = *(int *)pop(pendentes[ESTANTE]);
+          n_prateleira = *(int *)pop(pendentes[PRATELEIRA]);
+
+        } else if(!vazio(aberto[PRATELEIRA])){
+
+        } else {
+        }
+        break;
+    }
+  }
+  return;
+
+
+
+
+
+
+
+
+  return;
+}
+
+Lista * inicializar(char * nome_arquivo){
+  FILE * arquivo;
+  Lista * buffer_linha;
+  Lista * estantes = criar_lista();
+  Lista * pendentes[3];
+  Lista * sendo_lido;
   Livro * livro;
 
-  Lista * buffer_linha = criar_lista();
-  Lista * elemento_lido;
+  char * caracter;
   int bytes_lidos;
-  char * caracter = (char *) malloc(sizeof(char));
+  int i;
+
+  for(i = ESTANTE; i < LIVROS; i++){
+    pendentes[i] = criar_lista();
+  }
 
   arquivo = fopen(nome_arquivo,MODO_ABERTURA);
   do{
@@ -147,51 +259,24 @@ Lista * inicializar(char * nome_arquivo){
     if(vazia(buffer_linha)){ // Começo da linha
       switch (*caracter){
         case 'E': // Leitura da Estante
-          if(!vazia(leitura_livros)){ //Se houverem livros empilhados
-
-            prateleira_atual = prateleiras->cabeca;
-            n_prateleira = *((int)pop(prateleira_atual));
-
-            estante_atual = estantes->cabeca;
-            n_estante = *((int)pop(estante_atual))
-
-            livro = pop(leitura_livros);
-            while (livro){
-                push(criar_livro(livro,n_estante,n_prateleira),prateleira_atual);
-                livro = pop(leitura_livros);
-            }
-            push(prateleira_atual,estante_atual);
-          }
-          push(NULL,estantes);
-          elemento_lido = leitura_estantes;
-          break;
+          processar(pendentes,ESTANTE,estantes);
+          sendo_lido = pendentes[ESTANTE];
         case 'P': // Leitura da Prateleira
-          if(!vazia(leitura_livros)){ //Se houverem livros empilhados
-
-            prateleira_atual = prateleiras->cabeca;
-            n_prateleira = *((int)pop(prateleira_atual));
-
-            livro = pop(leitura_livros);
-            while (livro){
-                push(criar_livro(livro,n_estante,n_prateleira),prateleira_atual);
-                livro = pop(leitura_livros);
-            }
-          }
-          elemento_lido = leitura_prateleiras;
-          break;
+          processar_abertos(pendentes,PRATELEIRA,estantes);
+          sendo_lido = pendentes[PRATELEIRA];
         default: // Leitura do Livro
-          elemento_lido = leitura_livros;
+          sendo_lido = pendentes[LIVROS];
           break;
       }
       in(duplicar_char(caracter),buffer_linha);
     }
     else {// Meio da linha
-      if(*caracter != MARCADOR_EOL) {
+      if((*caracter != MARCADOR_EOL) && (*caracter != EOF)){
         in(duplicar_char(caracter),buffer_linha);
       }
-      else{ // Fim de leitura da linha
+      else { // Fim de leitura da linha
+        push(formatar(buffer_linha),sendo_lido);
         liberar(buffer_linha);
-        buffer_linha = criar_lista();
       }
     }
   } while (bytes_lidos != 0);
