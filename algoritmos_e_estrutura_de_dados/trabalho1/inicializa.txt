@@ -1,0 +1,40 @@
+E0
+P0
+10, Memorias Postumas de Bras Cubas, Machado de Assis
+13, O Discurso do Metodo, Rene Descartes
+P1
+5, Assim falava Zaratustra, Friedrich Nietzche
+7, O Hobbit, J. R. R. Tolkien
+8, Ulisses, James Joyce
+P2
+25, Os Elefantes nao esquecem, Agatha Christie
+44, Os Miseraveis, Victor Hugo
+70, A Prima Bette, Honore de Balzac
+E1
+P0
+2, A Divina Comedia, Dante Alighieri
+3, Frankenstein, Mary Shelley
+4, A Insustentavel Leveza do Ser, Milan Kundera
+P1
+P2
+30, Algoritmos em linguagem C, Paulo Feofiloff
+37, Sistemas Operacionais, Andrew Tanenbaum
+P3
+E2
+P0
+P1
+100, A Republica, Platao
+120, Inteligencia Artificial, Russell e Norvig
+130, Primeiras Estorias, Joao Guimaraes Rosa
+P2
+P3
+P4
+80, A Hora da Estrela, Clarice Lispector
+83, Romanceiro da Inconfidencia, Cecilia Meireles
+84, O Cortico, Aluisio de Azevedo
+E3
+P0
+200, O Tempo e o Vento, Erico Verissimo
+P1
+700, O Quinze, Raquel de Queiroz
+710, Feliz Ano Velho, Marcelo Rubens Paiva
