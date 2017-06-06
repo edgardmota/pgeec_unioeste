@@ -39,19 +39,40 @@ Lista * buscar_prateleira(Livro * livro, Lista * estantes){
   int n_prateleira;
   int n_estante;
   int codigo;
+  Elemento * elemento;
+  Lista * prateleira = NULL;
 
   codigo = livro->codigo;
   n_prateleira = livro->endereco.prateleira;
   n_estante = livro->endereco.estante;
-  return (Lista *) get(n_prateleira,(Lista *) get(n_estante,estantes)->conteudo)->conteudo;
+  elemento = get(n_estante,estantes);
+  if(elemento){
+    elemento = get(n_prateleira,(Lista *) elemento->conteudo);
+    if(elemento){
+      prateleira = (Lista *) elemento->conteudo;
+    }
+  }
+  return prateleira;
 }
 
-Livro * buscar_livro(int codigo, Lista * livros){
+Livro * buscar_livro(int codigo, Lista * livros, Lista * estantes){
+  Livro * livro = NULL;
+  Lista * prateleira;
+
   Elemento * elemento = get(encontrar_posicao(codigo,livros),livros);
-  if(elemento)
-    return (Livro *) elemento->conteudo;
-  else
-    return NULL;
+  if(elemento){
+    livro = (Livro *) elemento->conteudo;
+    if(codigo == livro->codigo){
+      prateleira = buscar_prateleira(livro,estantes);
+      elemento = get(encontrar_posicao(codigo,prateleira),prateleira);
+      if((elemento == NULL) || (((Livro *)elemento->conteudo)->codigo != livro->codigo))
+        livro = NULL;
+    }
+    else {
+      livro = NULL;
+    }
+  }
+  return livro;
 }
 
 int inserir_livro(Livro * livro, Lista * prateleira, Lista * livros){
@@ -220,17 +241,10 @@ int * fila_para_numero(Lista * fila){
 }
 
 Endereco_livro * buscar_endereco_livro(int codigo, Lista * estantes, Lista * livros){
-  Livro * livro = buscar_livro(codigo,livros);
-  Lista * prateleira;
+  Livro * livro = buscar_livro(codigo,livros,estantes);
 
-  if((livro != NULL) && (codigo == livro->codigo)){
-    prateleira = buscar_prateleira(livro,estantes);
-    livro = buscar_livro(codigo,prateleira);
-    if((livro != NULL) && (codigo == livro->codigo))
-      return &livro->endereco;
-    else
-      return NULL;
-  }
+  if(livro)
+    return &(livro->endereco);
   else
     return NULL;
 }
@@ -295,7 +309,7 @@ void processar(Lista * * pendentes, int novo_lido, Lista * processadas, Lista * 
   return;
 }
 
-void gravar_livros(Lista * livros,FILE * arquivo){
+void gravar_livros(Lista * livros,char * path_livros){
   int codigo;
   char * titulo;
   int tamanho_titulo;
@@ -303,7 +317,9 @@ void gravar_livros(Lista * livros,FILE * arquivo){
   int tamanho_autor;
   Endereco_livro * endereco;
   Elemento * cursor;
+  FILE * arquivo;
 
+  arquivo = fopen(path_livros,MODO_ESCRITA_BINARIOS);
   cursor = topo(livros);
   while(cursor != NULL){
     codigo = ((Livro *)(cursor->conteudo))->codigo;
@@ -329,10 +345,12 @@ void gravar_livros(Lista * livros,FILE * arquivo){
   return;
 }
 
-void gravar_estantes(Lista * estantes,FILE * arquivo){
+void gravar_estantes(Lista * estantes,char * path_estantes){
   Elemento * cursor;
   int tamanho;
+  FILE * arquivo;
 
+  arquivo = fopen(path_estantes,MODO_ESCRITA_BINARIOS);
   cursor = topo(estantes);
   while(cursor != NULL){
     tamanho = ((Lista*)cursor->conteudo)->tamanho;
@@ -344,19 +362,273 @@ void gravar_estantes(Lista * estantes,FILE * arquivo){
 }
 
 void persistir_em_arquivo(Lista * estantes, char * path_estantes, Lista * livros, char * path_livros){
-  FILE * arquivo_estantes_db;
-  FILE * arquivo_catalogo_db;
+  gravar_estantes(estantes,path_estantes);
+  gravar_livros(livros,path_livros);
+  return;
+}
 
-  arquivo_estantes_db = fopen(path_estantes,MODO_ABERTURA_BINARIOS);
-  gravar_estantes(estantes,arquivo_estantes_db);
-  arquivo_catalogo_db = fopen(path_livros,MODO_ABERTURA_BINARIOS);
-  gravar_livros(livros,arquivo_catalogo_db);
+void carregar_arquivos(char * path_estantes, Lista * estantes, char * path_livros, Lista * livros){
+  carregar_estantes(path_estantes,estantes);
+  carregar_livros(path_livros,livros,estantes);
+  return;
+}
+
+void carregar_livros(char * path_livros, Lista * livros, Lista * estantes){
+  FILE * arquivo;
+  Livro * livro;
+  char * titulo;
+  char * autor;
+  int codigo;
+  int tamanho_titulo;
+  int tamanho_autor;
+  Endereco_livro * endereco = (Endereco_livro*) malloc(sizeof(Endereco_livro));
+  int bytes_lidos;
+
+  arquivo = fopen(path_livros,MODO_LEITURA_BINARIOS);
+  bytes_lidos = fread(&codigo,sizeof(codigo),1,arquivo);
+  while (bytes_lidos != 0){
+
+    fread(&tamanho_titulo,sizeof(tamanho_titulo),1,arquivo);
+    titulo = (char *) malloc(sizeof(char)*tamanho_titulo);
+    fread(titulo,sizeof(*titulo),tamanho_titulo,arquivo);
+
+    fread(&tamanho_autor,sizeof(tamanho_autor),1,arquivo);
+    autor = (char *) malloc(sizeof(char)*tamanho_autor);
+    fread(autor,sizeof(*autor),tamanho_autor,arquivo);
+
+    fread(endereco,sizeof(*endereco),1,arquivo);
+
+    livro = criar_livro(codigo,titulo,autor,endereco->estante,endereco->prateleira);
+    inserir_livro(livro,buscar_prateleira(livro,estantes),livros);
+
+    bytes_lidos = fread(&codigo,sizeof(codigo),1,arquivo);
+    
+  }
+  fclose(arquivo);
+  return;
+}
+
+void carregar_estantes(char * path_estantes, Lista * estantes){
+  FILE * arquivo;
+  int bytes_lidos;
+  Lista * prateleira;
+  int tamanho;
+  int i;
+
+  arquivo = fopen(path_estantes,MODO_LEITURA_BINARIOS);
+  bytes_lidos = fread(&tamanho,sizeof(tamanho),1,arquivo);
+  while (bytes_lidos != 0){
+    prateleira = criar_lista();
+    for(i = 0; i < tamanho; i++){
+      in(criar_lista(),prateleira);
+    }
+    in(prateleira,estantes);
+    bytes_lidos = fread(&tamanho,sizeof(tamanho),1,arquivo);
+  }
+  fclose(arquivo);
+  return;
+}
+
+Sala * criar_sala(){
+  Sala * sala = (Sala *) malloc(sizeof(Sala));
+  sala->ra = RA_NULO;
+  sala->pilha = criar_lista();
+  return sala;
+}
+
+Salas * criar_salas(int n_salas){
+  Salas * salas = (Salas *) malloc(sizeof(Salas));
+  int i;
+
+  salas->livres = criar_lista();
+  salas->ocupadas = criar_lista();
+  salas->fila = criar_lista();
+  for(i = 0; i < N_SALAS; i++){
+    in(criar_sala(),salas->livres);
+  }
+  return salas;
+}
+
+Emprestimo * criar_emprestimo(int ra, Livro * livro){
+  Emprestimo * emprestimo = (Emprestimo *) malloc(sizeof(Emprestimo));
+  emprestimo->ra = ra;
+  emprestimo->livro = livro;
+  return emprestimo;
+}
+
+int remover_prateleira(Livro * livro, Lista * estantes){
+  Lista * prateleira = buscar_prateleira(livro,estantes);
+
+  if (remover(encontrar_posicao(livro->codigo,prateleira),prateleira))
+    return TRUE;
+  else
+    return FALSE;
+}
+
+int inserir_prateleira(Livro * livro, Lista * estantes){
+  Lista * prateleira = buscar_prateleira(livro,estantes);
+
+  if (inserir(livro,encontrar_posicao(livro->codigo,prateleira),prateleira))
+    return TRUE;
+  else
+    return FALSE;
+}
+
+int liberar_sala(int ra, Salas * salas, Lista * estantes){
+  Sala * sala = sala_usada(ra,salas->ocupadas,TRUE);
+  Emprestimo * emprestimo = NULL;
+  Livro * livro;
+  int liberou = FALSE;
+
+  if(sala){
+    while(!vazia(sala->pilha)){
+      livro = pop(sala->pilha);
+      inserir_prateleira(livro,estantes);
+    }
+    sala->ra = RA_NULO;
+    push(sala,salas->livres);
+    emprestimo = out(salas->fila);
+    if(emprestimo){
+      locar_sala(emprestimo,salas);
+    }
+    liberou = TRUE;
+  }
+  return liberou;
+}
+
+Sala * sala_usada(int ra, Lista * ocupadas, int liberar){
+  Elemento * atual;
+  int posicao = 0;
+  Sala * sala = NULL;
+
+  atual = ocupadas->cabeca->proximo;
+  while((atual != NULL) && (((Sala *)(atual->conteudo))->ra != ra)){
+    atual = atual->proximo;
+    posicao++;
+  }
+  if (atual != NULL){
+    if(liberar)
+      return (Sala *) remover(posicao,ocupadas);
+    else
+      return (Sala *)(atual->conteudo);
+  }
+  else
+    return NULL;
+}
+
+int locar_sala(Emprestimo * emprestimo, Salas * salas){
+    Sala * sala;
+
+    sala = sala_usada(emprestimo->ra,salas->ocupadas,FALSE);
+    if(sala){
+      push(emprestimo->livro,sala->pilha);
+    }
+    else{
+      if(!vazia(salas->livres)){
+        sala = pop(salas->livres);
+        sala->ra = emprestimo->ra;
+        push(emprestimo->livro,sala->pilha);
+        push(sala,salas->ocupadas);
+      }
+      else
+        in(emprestimo,salas->fila);
+    }
+    return TRUE;
+}
+
+int emprestar_livro(int ra, int codigo, Lista * estantes, Lista * livros, Salas * salas){
+  Emprestimo * emprestimo;
+  Endereco_livro * endereco;
+  int emprestado = FALSE;
+  Livro * livro;
+
+  livro = buscar_livro(codigo,livros,estantes);
+  if(livro){
+    remover_prateleira(livro,estantes);
+    emprestimo = criar_emprestimo(ra,livro);
+    locar_sala(emprestimo,salas);
+    emprestado = TRUE;
+  }
+  return emprestado;
+}
+
+void imprimir_mapa_de_estantes(Lista * estantes){
+  int estante = 0;
+  int prateleira = 0;
+  Livro * livro;
+  Elemento * cursor_prateleiras;
+  Elemento * cursor_livros;
+  Elemento * cursor_estantes = get(estante,estantes);
+
+  printf("\n------------------------------------\n");
+  while(cursor_estantes){
+    printf("[E%d]:\n",estante);
+    cursor_prateleiras = get(0,cursor_estantes->conteudo);
+    while(cursor_prateleiras){
+      printf("\t[P%d]:\n",prateleira);
+      cursor_livros = get(0,cursor_prateleiras->conteudo);
+      while(cursor_livros){
+        livro = (Livro *) cursor_livros->conteudo;
+        printf("\t\t[%d/%s/%s]\n",livro->codigo,livro->titulo,livro->autor);
+        cursor_livros = cursor_livros->proximo;
+      }
+      prateleira++;
+      cursor_prateleiras = cursor_prateleiras->proximo;
+    }
+    estante++;
+    prateleira=0;
+    cursor_estantes = cursor_estantes->proximo;
+  }
+  printf("\n------------------------------------\n");
+  return;
+}
+
+void imprimir_fila_de_espera_de_sala(Salas * salas){
+  Elemento * cursor_emprestimos;
+  Emprestimo * emprestimo;
+  Livro * livro;
+
+  printf("\n------------------------------------\nFila (%d): \n\n",salas->fila->tamanho);
+  cursor_emprestimos = get(0,salas->fila);
+  while(cursor_emprestimos){
+    emprestimo = (Emprestimo *) cursor_emprestimos->conteudo;
+    livro = emprestimo->livro;
+    printf("\tRA: %d\n",emprestimo->ra);
+    printf("\t\t\t[%d/%s/%s]\n",livro->codigo,livro->titulo,livro->autor);
+    cursor_emprestimos = cursor_emprestimos->proximo;
+  }
+  printf("------------------------------------\n");
+  return;
+}
+
+void imprimir_mapa_de_salas(Salas * salas){
+  Elemento * cursor_salas;
+  Sala * sala;
+  Elemento * cursor_livros;
+  Livro * livro;
+  printf("\n------------------------------------\nSalas livres: %d\n",salas->livres->tamanho);
+  printf("Salas ocupadas (%d):\n\n",salas->ocupadas->tamanho);
+  int n_sala = 0;
+
+  cursor_salas = get(0,salas->ocupadas);
+  while(cursor_salas){
+    printf("\t[%d]:\n",n_sala);
+    sala = (Sala *) cursor_salas->conteudo;
+    printf("\t\tRA: %d\n",sala->ra);
+    cursor_livros = get(0,sala->pilha);
+    while(cursor_livros){
+      livro = (Livro *) cursor_livros->conteudo;
+      printf("\t\t\t[%d/%s/%s]\n",livro->codigo,livro->titulo,livro->autor);
+      cursor_livros = cursor_livros->proximo;
+    }
+    n_sala++;
+    cursor_salas = cursor_salas->proximo;
+  }
+  printf("------------------------------------\n");
   return;
 }
 
 void inicializar(char * nome_arquivo, Lista * estantes, Lista * livros){
-  FILE * arquivo_catalogo_db;
-  FILE * arquivo_estantes_db;
   FILE * arquivo_inicializacao;
   Lista * buffer_linha = criar_lista();
   Lista * processadas = criar_lista();
@@ -373,7 +645,7 @@ void inicializar(char * nome_arquivo, Lista * estantes, Lista * livros){
     pendentes[i] = criar_lista();
   }
 
-  arquivo_inicializacao = fopen(nome_arquivo,MODO_ABERTURA_INICIALIZACAO);
+  arquivo_inicializacao = fopen(nome_arquivo,MODO_LEITURA_INICIALIZACAO);
   bytes_lidos = fread(caracter,TAMANHO_LEITURA,UNIDADES_LEITURA,arquivo_inicializacao);
   while (bytes_lidos != 0){
     if(vazia(buffer_linha)){ // Começo da linha
