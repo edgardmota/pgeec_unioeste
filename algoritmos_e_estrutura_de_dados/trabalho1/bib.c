@@ -189,20 +189,16 @@ Livro * parsear_livro(Lista * buffer_linha){
   Livro * livro = NULL;
   char * caracter = NULL;
   char * buffer;
-  int maior_string = 0;
   int acumulado;
 
   if(buffer_linha){
-    buffer = (char *) malloc(sizeof(char));
     for(i = 0; i < NUMERO_CAMPOS_LIVRO; i++){
+      buffer = (char *) malloc(sizeof(char));
       *buffer = '\0';
       caracter = (char *) out(buffer_linha);
       while ((caracter != NULL) && (*caracter != ',')){
         acumulado = strlen(buffer) + 1;
-        if(acumulado > maior_string){
-          maior_string = acumulado;
-          buffer = realloc(buffer, acumulado);
-        }
+        buffer = realloc(buffer, acumulado);
         strncat(buffer,caracter,1);
         caracter = (char *) out(buffer_linha);
       }
@@ -213,9 +209,9 @@ Livro * parsear_livro(Lista * buffer_linha){
         campos[i-1] = (char *) malloc(sizeof(char)*strlen(buffer));
         strcpy(campos[i-1],buffer);
       }
+      free(buffer);
     }
   }
-  free(buffer);
   return criar_livro(codigo,campos[CAMPO_TITULO],campos[CAMPO_AUTOR],-1,-1);
 }
 
@@ -318,25 +314,27 @@ void gravar_livros(Lista * livros,char * path_livros){
   Endereco_livro * endereco;
   Elemento * cursor;
   FILE * arquivo;
+  Livro * livro;
 
   arquivo = fopen(path_livros,MODO_ESCRITA_BINARIOS);
   cursor = topo(livros);
   while(cursor != NULL){
-    codigo = ((Livro *)(cursor->conteudo))->codigo;
+    livro = (Livro *) cursor->conteudo;
 
+    codigo = livro->codigo;
     fwrite(&codigo,sizeof(codigo),1,arquivo);
 
-    titulo = ((Livro *)(cursor->conteudo))->titulo;
+    titulo = livro->titulo;
     tamanho_titulo = strlen(titulo);
     fwrite(&tamanho_titulo,sizeof(tamanho_titulo),1,arquivo);
     fwrite(titulo,sizeof(*titulo),tamanho_titulo,arquivo);
 
-    autor = ((Livro *)(cursor->conteudo))->autor;
+    autor = livro->autor;
     tamanho_autor = strlen(autor);
     fwrite(&tamanho_autor,sizeof(tamanho_autor),1,arquivo);
     fwrite(autor,sizeof(*autor),tamanho_autor,arquivo);
 
-    endereco = &((Livro *)(cursor->conteudo))->endereco;
+    endereco = &livro->endereco;
     fwrite(endereco,sizeof(*endereco),1,arquivo);
 
     cursor = cursor->proximo;
@@ -391,10 +389,12 @@ void carregar_livros(char * path_livros, Lista * livros, Lista * estantes){
     fread(&tamanho_titulo,sizeof(tamanho_titulo),1,arquivo);
     titulo = (char *) malloc(sizeof(char)*tamanho_titulo);
     fread(titulo,sizeof(*titulo),tamanho_titulo,arquivo);
+    titulo[tamanho_titulo] = '\0';
 
     fread(&tamanho_autor,sizeof(tamanho_autor),1,arquivo);
     autor = (char *) malloc(sizeof(char)*tamanho_autor);
     fread(autor,sizeof(*autor),tamanho_autor,arquivo);
+    autor[tamanho_autor] = '\0';
 
     fread(endereco,sizeof(*endereco),1,arquivo);
 
@@ -402,7 +402,7 @@ void carregar_livros(char * path_livros, Lista * livros, Lista * estantes){
     inserir_livro(livro,buscar_prateleira(livro,estantes),livros);
 
     bytes_lidos = fread(&codigo,sizeof(codigo),1,arquivo);
-    
+
   }
   fclose(arquivo);
   return;
