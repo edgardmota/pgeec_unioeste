@@ -1,15 +1,9 @@
-function pn = polynomial_interpolation(X,Y,n,points)
+function pn = polynomial_interpolation(X,Y,d,n,points);
   valid_args = false;
   if valid_inputs(X,Y)
-    if (~(exist('n','var')) || (size(n,1) == 0) || (size(points,1) == 0))
-      n = get_n_size(X);
-      points = [1:n+1];
-      valid_args = true;
-    elseif exist('points','var')
       if (check_points(X,n,points))
         valid_args = true;
       end
-    end
   end
   if valid_args
     A = zeros(n+1);
@@ -46,7 +40,7 @@ function valid = check_points(X,n,points)
   valid = (max_index <= X_size) & (min_index >= 1) & (points_size == sum(count)) & (points_size == (n + 1));
 end
 
-function n = get_n_size(X)
+function n = get_size(X)
   n = size(X,2) - 1;
 end
 
@@ -63,28 +57,75 @@ function [X, Y] = get_XY
   Y = input('Entre com o vetor Y: ');
 end
 
+function m = max_dd_n_p_1(d,n)
+  pos = n + 2;
+  if (pos > size(d,1)) 
+    pos = pos - 1
+  end
+  l = reshape(d(:,pos),1,size(d,1));
+  for i = 1:n+1
+    l(i) = abs(l(i));
+  end
+  m = max(l);
+end
+
+function enx = estimated_error(x,X,d,n,points)
+  enx = max_dd_n_p_1(d,n);
+  for i = 1:n+1
+    enx = enx*(x-X(points(i)));
+  end
+  enx = abs(enx);
+end
+
+function d = divided_differences(X, Y)
+  valid_args = false;
+  if (nargin == 2)
+      [p , n] = size(X);
+      if ((p == 1) & (p ==size(Y, 1)) & (n == size(Y, 2)))
+        valid_args = true;
+      end
+  end
+  if valid_args
+    d = zeros(n, n);
+    d(:,1) = Y';
+    for j = 2:n
+        for i = 1:(n - j + 1)
+            d(i,j) = (d(i + 1, j - 1) - d(i, j - 1)) / (X(i + j - 1) - X(i));
+        end
+    end
+  else
+    error('Erro: argumentos invalidos!');
+  end
+end
+
 function [n, points] = get_n_points
   n = input('Grau do polinomio aproximador (n) (vazio para grau maximo): ');
   if (size(n,1) ~= 0)
-    points = input('Vetor com os indices de X a serem usados: ');
+    point = input(sprintf('Indice de X a partir do qual usar %d pontos: ',n + 1));
+    points = [point:point+n];
   else
+    n = 0;
     points = [];
   end
 end
 
-function test_x(pn)
-  disp(strcat("\nPn(x)=",func2str(pn)));
+function test_x(pn,X,d,n,points)
+  disp(strcat("\npn(x)=",func2str(pn)));
   x = input("\nDigite um valor para x (vazio para sair): ",'s');
   while (~strcmp(x,''))
     x = eval(x);
-    disp(strcat("\nPn(",num2str(x),')=',num2str(pn(x))));
-    disp(strcat("\nPn(x)=",func2str(pn)));
+    disp(strcat("\nPn(",num2str(x),')=',num2str(pn(x)),' (Erro aproximado:  ',num2str(estimated_error(x,X,d,n,points)),')'));
+    disp(strcat("\npn(x)=",func2str(pn)));
     x = input("\nDigite um valor para x (vazio para sair): ",'s');
   end
 end
 
 [X, Y] = get_XY;
 [n, points] = get_n_points;
-pn = polynomial_interpolation(X,Y,n,points);
-test_x(pn);
-
+if (n == 0)
+  n = get_size(X);
+  points = [1:n+1];
+end
+d = divided_differences(X,Y);
+pn = polynomial_interpolation(X,Y,d,n,points);
+test_x(pn,X,d,n,points);

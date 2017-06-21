@@ -1,6 +1,6 @@
 function S = linear_spline(X,Y)
   if valid_inputs(X,Y)
-    n = get_n_size(X);
+    n = get_size(X);
     S_str='@(x)';
     for i = 1:n
       interval_str = sprintf('((x>%0.5f) & (x<=%0.5f)) .* ',X(i),X(i+1));
@@ -13,7 +13,7 @@ function S = linear_spline(X,Y)
   end
 end
 
-function n = get_n_size(X)
+function n = get_size(X)
   n = size(X,2) - 1;
 end
 

@@ -1,7 +1,7 @@
 function S = cubic_spline(X,Y)
   if valid_inputs(X,Y)
     points_per_base = 5;
-    n = get_n_size(X);
+    n = get_size(X);
     h=zeros(1,n);
     for k = 1:n
         h(k) = X(k+1) - X(k);
@@ -45,7 +45,7 @@ function X = gauss(A, b)
   X = A\b;
 end
 
-function n = get_n_size(X)
+function n = get_size(X)
   n = size(X,2) - 1;
 end
 
