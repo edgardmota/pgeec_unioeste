@@ -90,12 +90,12 @@ end
 
 function test_x(pn)
   disp(strcat("\npn(x)=",func2str(pn)));
-  x = input("\nDigite um valor para (x) ou 'sair': ",'s');
-  while (~strcmp(x,'sair'))
+  x = input("\nDigite um valor para x (vazio para sair): ",'s');
+  while (~strcmp(x,''))
     x = eval(x);
     disp(strcat("\nPn(",num2str(x),')=',num2str(pn(x))));
     disp(strcat("\npn(x)=",func2str(pn)));
-    x = input("\nDigite um valor para (x) ou 'sair': ",'s');
+    x = input("\nDigite um valor para x (vazio para sair): ",'s');
   end
 end
 
