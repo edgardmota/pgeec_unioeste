@@ -1,34 +1,3 @@
-%function S = cubic_spline(X,Y)
-%  if valid_inputs(X,Y)
-%    n = get_n_size(X);
-%    h=zeros(1,n);
-%    for k = 1:n
-%      h(k) = X(k+1) - X(k);
-%    end
-%    g = zeros(5);
-%    b = zeros(5,1);
-%    for k = 1:5
-%        for j = 1:5
-%          g(k,j) = 0;
-%        end
-%      if ((k == 1)||(k == 5))
-%        g(k,k) = 1;
-%        b(k,1) = 0;
-%      else
-%        g(k,k-1) = h(k);
-%        g(k,k) = 2*(h(k-1)+h(k));
-%        g(k,k+1) = h(k);
-%        b(k,1) = 6*((Y(k+1)-Y(k))/h(k)-(Y(k)-Y(k-1))/h(k-1));
-%      end
-%    end
-%    X = gauss(g,b);
-%    X
-%    S = sprintf('@(x)');
-%  else
-%    error('Erro: argumentos invalidos!');
-%  end
-%end
-
 function S = cubic_spline(X,Y)
   if valid_inputs(X,Y)
   
