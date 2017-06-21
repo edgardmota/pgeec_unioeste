@@ -27,12 +27,12 @@ function [X, Y] = get_XY
 end
 
 function test_x(S)
-  disp(strcat("\npn(x)=",func2str(S)));
+  disp(strcat("\S(x)=",func2str(S)));
   x = input("\nDigite um valor para (x) ou 'sair': ",'s');
   while (~strcmp(x,'sair'))
     x = eval(x);
-    disp(strcat("\nPn(",num2str(x),')=',num2str(S(x))));
-    disp(strcat("\npn(x)=",func2str(S)));
+    disp(strcat("\nS(",num2str(x),')=',num2str(S(x))));
+    disp(strcat("\nS(x)=",func2str(S)));
     x = input("\nDigite um valor para (x) ou 'sair': ",'s');
   end
 end
