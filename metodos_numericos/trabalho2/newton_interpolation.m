@@ -1,4 +1,4 @@
-function pn = lagrange_interpolation(X,Y,n,points)
+function pn = newton_interpolation(X,Y,n,points)
   valid_args = false;
   if valid_inputs(X,Y)
     if (~(exist('n','var')) || (size(n,1) == 0) || (size(points,1) == 0))
@@ -12,17 +12,39 @@ function pn = lagrange_interpolation(X,Y,n,points)
     end
   end
   if valid_args
-    pn_str='@(x)';
-    for k = 1:(n+1)
-      Lk_str = '1';
-      for j = 1:(n+1)
-         if j ~= k
-          Lk_str=strcat(Lk_str,'*((x-(',num2str(X(points(j))),'))/(',num2str(X(points(k))),'-(',num2str(X(points(j))),')))');
-         end
-      end
-      pn_str=strcat(pn_str,'+(',Lk_str,'*',num2str(Y(points(k))),')');
+    n_X = zeros(1,n+1);
+    y_X = zeros(1,n+1);
+    for i = 1:(n+1)
+      n_X(i) = X(points(i));
+      n_Y(i) = Y(points(i));
     end
-  pn = eval(pn_str);
+    d = (divided_differences( n_X, n_Y));
+    pn_str = strcat('@(x)',num2str(d(1,1)));
+    for i = 2:n+1
+      pn_str=strcat('+(',d(1,i),')*(x-(',num2str(n_X(i-1)),'))');
+    end
+    pn = eval(pn_str);
+  else
+    error('Erro: argumentos invalidos!');
+  end
+end
+
+function d = divided_differences(X, Y)
+  valid_args = false;
+  if (nargin == 2)
+      [p , n] = size(X);
+      if ((p == 1) & (p ==size(Y, 1)) & (n == size(Y, 2)))
+        valid_args = true
+      end
+  end
+  if valid_args
+    d = zeros(n, n);
+    d(:,1) = Y';
+    for j = 2:n
+        for i = 1:(n - j + 1)
+            d(i,j) = (d(i + 1, j - 1) - d(i, j - 1)) / (X(i + j - 1) - X(i));
+        end
+    end
   else
     error('Erro: argumentos invalidos!');
   end
@@ -75,6 +97,6 @@ end
 
 [X, Y] = get_XY;
 [n, points] = get_n_points;
-pn = lagrange_interpolation(X,Y,n,points);
+pn = polynomial_interpolation(X,Y,n,points);
 test_x(pn);
 

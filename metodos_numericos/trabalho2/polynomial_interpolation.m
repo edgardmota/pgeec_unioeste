@@ -23,12 +23,12 @@ function pn = polynomial_interpolation(X,Y,n,points)
       b(i) = Y(points(i));
     end
     a = gauss(A, b);
-    pn_str = '';
+    pn_str = '@(x)';
     for i = 1:size(a,1)
       term_str = strcat('+(', num2str(a(i,1)),'*x^',num2str(i-1),')');
       pn_str = strcat(pn_str,term_str);
     end
-    pn = eval(strcat('@(x)',pn_str));
+    pn = eval(pn_str);
   else
     error('Erro: argumentos invalidos!');
   end
