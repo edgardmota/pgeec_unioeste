@@ -1,11 +1,13 @@
-function s = linear_spline(X,Y)
+function S = linear_spline(X,Y)
   if valid_inputs(X,Y)
     n = get_n_size(X);
-    disp('f = @(x) (x>0) .* x + (x<0) .*-1*x');
-    for i = 2:n+1
-      pn_str=strcat('+(',d(1,i),')*(x-(',num2str(n_X(i-1)),'))');
+    S_str='@(x)';
+    for i = 1:n
+      interval_str = sprintf('((x>%0.5f) & (x<=%0.5f)) .* ',X(i),X(i+1));
+      sik = sprintf('((%0.5f)*(%0.5f-(x))+(%0.5f*(x-(%0.5f))))/(%0.5f - %0.5f)',X(i),X(i+1),X(i+1),X(i),X(i+1),X(i));
+      S_str=strcat(S_str,'+',interval_str,sik);
     end
-    pn = eval(pn_str);
+    S = eval(S_str);
   else
     error('Erro: argumentos invalidos!');
   end
@@ -24,18 +26,17 @@ function [X, Y] = get_XY
   Y = input('Entre com o vetor Y: ');
 end
 
-function test_x(pn)
-  disp(strcat("\npn(x)=",func2str(pn)));
+function test_x(S)
+  disp(strcat("\npn(x)=",func2str(S)));
   x = input("\nDigite um valor para (x) ou 'sair': ",'s');
   while (~strcmp(x,'sair'))
     x = eval(x);
-    disp(strcat("\nPn(",num2str(x),')=',num2str(pn(x))));
-    disp(strcat("\npn(x)=",func2str(pn)));
+    disp(strcat("\nPn(",num2str(x),')=',num2str(S(x))));
+    disp(strcat("\npn(x)=",func2str(S)));
     x = input("\nDigite um valor para (x) ou 'sair': ",'s');
   end
 end
 
 [X, Y] = get_XY;
-pn = spline_linear(X,Y);
-test_x(pn);
-
+S = linear_spline(X,Y);
+test_x(S);

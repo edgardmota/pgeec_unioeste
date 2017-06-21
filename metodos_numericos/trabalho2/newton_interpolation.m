@@ -38,7 +38,7 @@ function d = divided_differences(X, Y)
   if (nargin == 2)
       [p , n] = size(X);
       if ((p == 1) & (p ==size(Y, 1)) & (n == size(Y, 2)))
-        valid_args = true
+        valid_args = true;
       end
   end
   if valid_args
