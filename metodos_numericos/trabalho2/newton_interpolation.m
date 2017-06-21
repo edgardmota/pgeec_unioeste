@@ -18,10 +18,14 @@ function pn = newton_interpolation(X,Y,n,points)
       n_X(i) = X(points(i));
       n_Y(i) = Y(points(i));
     end
-    d = (divided_differences( n_X, n_Y));
+    d = divided_differences(n_X, n_Y);
     pn_str = strcat('@(x)',num2str(d(1,1)));
-    for i = 2:n+1
-      pn_str=strcat('+(',d(1,i),')*(x-(',num2str(n_X(i-1)),'))');
+    for i = 2:(n+1)
+      x_xj = num2str(d(1,i));
+      for j = 1:(i - 1)
+        x_xj = strcat(x_xj,'*(x-(',num2str(n_X(j)),'))');
+      end
+      pn_str=strcat(pn_str,'+(',x_xj,')');
     end
     pn = eval(pn_str);
   else
@@ -97,6 +101,6 @@ end
 
 [X, Y] = get_XY;
 [n, points] = get_n_points;
-pn = polynomial_interpolation(X,Y,n,points);
+pn=newton_interpolation(X,Y,n,points);
 test_x(pn);
 
