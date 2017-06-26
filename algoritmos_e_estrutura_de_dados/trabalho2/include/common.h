@@ -1,0 +1,20 @@
+#ifndef _COMMON_H_
+#define _COMMON_H_
+
+// Tipos definidos
+typedef char small_t;
+typedef char * string_t;
+typedef unsigned long long byte_pointer_t; // Tamanho do Maior Arquivo de Dados Possível: 28507725 (~ 3,9 MB)
+typedef unsigned short data_register_size_t;
+typedef unsigned char boolean_t;
+
+// Constantes Booleanas
+#define TRUE 1
+#define FALSE 0
+
+// Nó da lista de nós vazios
+typedef struct empty_node {
+  data_register_size_t size; // Tamanho do nó vazio
+  byte_pointer_t next; // Ponteiro para próximo nó
+} empty_node;
+#endif

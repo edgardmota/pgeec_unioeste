@@ -1,0 +1,26 @@
+**************************
+Maior Registro Possível: 435
+Maior Nº de Registros Possível: 65535
+Tamanho do Maior Arquivo de Dados Possível: 28507725 (~ 3,9 MB)
+**** ARQUIVO DE DADOS ****
+register_size: unsigned short/2 bytes;
+endereco_size: char/1 byte;
+nome_size: char/1 byte;
+rg_size: char/1 byte;
+telefone_size: char/1 byte;
+celular_size: char/1 byte;
+email_size: char/1 byte;
+
+matricula: unsigned short/ 2 bytes;
+sexo: char/1 byte;
+CPF: char/12 bytes;
+data de nascimento: unsigned int/4 bytes;
+
+endereco: char */1-127 bytes;
+nome: char */1-127 bytes;
+RG: char */1-127 bytes;
+
+telefone: char */[0,13] bytes;
+celular: char */[0,14] bytes;
+e-mail: char */0-127 bytes;
+**** ARQUIVO DE INDICE ****
