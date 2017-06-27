@@ -16,11 +16,11 @@ string_t tokenizer(string_t string, string_t delimiters, int * control){
 
   if(*control == NONE)
     *control = 0;
-  for(count = 0; (*control < strlen(string)) && (strchr(delimiters,string[(int)*control]) == NULL); (*control)++){
+  for(count = 0; (*control < strlen(string)) && (strchr(delimiters,string[*control]) == NULL); (*control)++){
     if(count == 0)
       token =(string_t) malloc(sizeof(char));
     token_size = strlen(token);
-    token[(int)count] = string[(int)*control];
+    token[(int)count] = string[*control];
     if(realloc(token,token_size + 1)){
       token[count + 1] = '\0';
       count++;

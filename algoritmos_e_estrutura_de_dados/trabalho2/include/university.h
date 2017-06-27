@@ -17,6 +17,7 @@
 // Quantidade de campos do arquivo de inicialização
 #define NUMBER_FIELDS 10
 #define NUMBER_OF_VARIABLE_SIZE_FIELDS 6 // Existem 6 campos de tamanho variável
+#define NUMBER_OF_STRING_FIELDS 7 // Existem 7 campos do tipo string
 
 // Campos do Arquivo de Inicialização
 

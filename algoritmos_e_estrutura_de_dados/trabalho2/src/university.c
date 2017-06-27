@@ -51,19 +51,22 @@ boolean_t store(string_t token, small_t position, string_t ** mapping, binary_da
       break;
     case MATRICULA:
       data_register->matricula = atoi(token);
+      free(token);
       break;
     case DATA_NASC:
       data_register->data_nascimento = str_to_timestamp(token,DATE_FORMAT);
+      free(token);
       break;
     case SEXO:
       data_register->sexo = token[0];
+      free(token);
       break;
   }
   return TRUE;
 }
 
 boolean_t load_input_file(string_t path_input_file, FILE * data_file, FILE * index_file){
-    string_t * str_fields[NUMBER_OF_VARIABLE_SIZE_FIELDS + 1]; //CPF é fixo mas é string, por isso + 1
+    string_t * str_fields[NUMBER_OF_STRING_FIELDS];
     FILE * input_file;
     small_t position;
     string_t line;
@@ -74,19 +77,26 @@ boolean_t load_input_file(string_t path_input_file, FILE * data_file, FILE * ind
     binary_data_register data_register;
 
     input_file = fopen(path_input_file,"r");
-    data_mapping(str_fields,&data_register);
+
     if(input_file){
+      data_mapping(str_fields,&data_register);
       while ((bytes_read = getline(&line, &n, input_file)) != NONE) {
         printf("%s",line);
+
         // Extração da Matricula
         tokenizer_control = NONE;
         position = 0;
         token = tokenizer(line,INPUT_FILE_DELIMITERS,&tokenizer_control);
         store(token,position,str_fields,&data_register);
+
         // Extração dos demais campos
         for(position++ ; position <= NUMBER_FIELDS-1; position++){
           token = tokenizer(line,INPUT_FILE_DELIMITERS,&tokenizer_control);
           store(token,position,str_fields,&data_register);
+        }
+        for(int i = 0; i < NUMBER_OF_STRING_FIELDS; i++){
+          if(*(str_fields[i]))
+            free(*(str_fields[i]));
         }
       }
       free(line);
