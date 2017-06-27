@@ -1,53 +1,63 @@
 #include "university.h"
 
-int mapping_function(small_t source, small_t mapping_type){
-  int result = NONE;
-  switch (mapping_type) {
-    case DATA_MAPPING:
-      // Interpolação Polinomial obtida pela resolução de Sistema Linear com Matriz de Vandermonde
-      result = round(2  - 3.8714 * source + 2.4115 * pow(source,2) - 0.62202 * pow(source,3) + 0.088294 * pow(source,4) - 0.0065476 * pow(source,5) + 0.00019841 * pow(source,6));
-      break;
-    case SIZE_MAPPING:
-      // Interpolação Polinomial obtida pela forma de Newton
-      result = round((15873 * pow(source,5) - 476191 * pow(source,4) + 5634925 * pow(source,3) - 32857209 * pow(source,2) + 74349562 * source - 46666960)/20000000);
-      break;
-  }
-  return result;
-}
-
-boolean_t data_mapping(string_t ** str_fields, binary_data_register * data_register){
-  str_fields[mapping_function(NOME,DATA_MAPPING)] = &data_register->nome;
-  str_fields[mapping_function(CPF,DATA_MAPPING)] = &data_register->cpf;
-  str_fields[mapping_function(RG,DATA_MAPPING)] = &data_register->rg;
-  str_fields[mapping_function(TELEFONE,DATA_MAPPING)] = &data_register->telefone;
-  str_fields[mapping_function(CELULAR,DATA_MAPPING)] = &data_register->celular;
-  str_fields[mapping_function(EMAIL,DATA_MAPPING)] = &data_register->email;
-  str_fields[mapping_function(ENDERECO,DATA_MAPPING)] = &data_register->endereco;
+boolean_t str_field_filling(string_t token, string_t * field, small_t * size){
+  if(size)
+    *size = token ? strlen(token): 0;
+  *field = token;
   return TRUE;
 }
 
-boolean_t store(string_t token, small_t position, string_t ** mapping, binary_data_register * data_register){
-  string_t * str_field;
+boolean_t str_field_freeing(string_t * field){
+  if (*field){
+    free(*field);
+    *field = NULL;
+  }
+  return TRUE;
+}
 
+boolean_t total_register_size_filling(binary_data_register * data_register){
+  data_register_size_t register_size = 0;
+
+  // Tamanho dos campos de tamanho fixo
+  register_size += sizeof(data_register->register_size);
+  register_size += sizeof(data_register->variable_field_size);
+  register_size += sizeof(data_register->matricula);
+  register_size += sizeof(data_register->sexo);
+  register_size += strlen(data_register->cpf);
+  register_size += sizeof(data_register->data_nascimento);
+  register_size += sizeof(data_register->data_nascimento);
+
+  // Campos de Tamanho variável
+  for(int i; i < NUMBER_OF_VARIABLE_SIZE_FIELDS; i++){
+    register_size += data_register->variable_field_size[i];
+  }
+  data_register->register_size = register_size;
+  return TRUE;
+}
+
+boolean_t register_filling(string_t token, small_t position, binary_data_register * data_register){
   switch (position) {
     // Strings
     case NOME:
+      str_field_filling(token,&data_register->nome,&data_register->variable_field_size[NOME + NOME_OFFSET]);
+      break;
     case CPF:
+      str_field_filling(token,&data_register->cpf,NULL);
+      break;
     case RG:
+      str_field_filling(token,&data_register->rg,&data_register->variable_field_size[RG + OTHERS_OFFSET]);
+      break;
     case TELEFONE:
+      str_field_filling(token,&data_register->telefone,&data_register->variable_field_size[TELEFONE + OTHERS_OFFSET]);
+      break;
     case CELULAR:
+      str_field_filling(token,&data_register->celular,&data_register->variable_field_size[CELULAR + OTHERS_OFFSET]);
+      break;
     case EMAIL:
+      str_field_filling(token,&data_register->email,&data_register->variable_field_size[EMAIL + OTHERS_OFFSET]);
+      break;
     case ENDERECO:
-      str_field = mapping[mapping_function(position,DATA_MAPPING)];
-      if(token){
-        *str_field = token;
-        if(position != CPF)
-          data_register->variable_field_size[mapping_function(position,SIZE_MAPPING)] = strlen(*str_field);
-        }
-      else{
-        *str_field = NULL;
-        data_register->variable_field_size[mapping_function(position,SIZE_MAPPING)] = 0;
-      }
+      str_field_filling(token,&data_register->endereco,&data_register->variable_field_size[ENDERECO + OTHERS_OFFSET]);
       break;
     case MATRICULA:
       data_register->matricula = atoi(token);
@@ -66,7 +76,6 @@ boolean_t store(string_t token, small_t position, string_t ** mapping, binary_da
 }
 
 boolean_t load_input_file(string_t path_input_file, FILE * data_file, FILE * index_file){
-    string_t * str_fields[NUMBER_OF_STRING_FIELDS];
     FILE * input_file;
     small_t position;
     string_t line;
@@ -76,28 +85,30 @@ boolean_t load_input_file(string_t path_input_file, FILE * data_file, FILE * ind
     int tokenizer_control;
     binary_data_register data_register;
 
-    input_file = fopen(path_input_file,"r");
+    input_file = fopen(path_input_file,INPUT_FILE_OPEN_MODE);
 
     if(input_file){
-      data_mapping(str_fields,&data_register);
       while ((bytes_read = getline(&line, &n, input_file)) != NONE) {
-        printf("%s",line);
 
         // Extração da Matricula
         tokenizer_control = NONE;
         position = 0;
         token = tokenizer(line,INPUT_FILE_DELIMITERS,&tokenizer_control);
-        store(token,position,str_fields,&data_register);
+        register_filling(token,position,&data_register);
 
         // Extração dos demais campos
         for(position++ ; position <= NUMBER_FIELDS-1; position++){
           token = tokenizer(line,INPUT_FILE_DELIMITERS,&tokenizer_control);
-          store(token,position,str_fields,&data_register);
+          register_filling(token,position,&data_register);
         }
-        for(int i = 0; i < NUMBER_OF_STRING_FIELDS; i++){
-          if(*(str_fields[i]))
-            free(*(str_fields[i]));
-        }
+        total_register_size_filling(&data_register);
+        str_field_freeing(&data_register.nome);
+        str_field_freeing(&data_register.cpf);
+        str_field_freeing(&data_register.rg);
+        str_field_freeing(&data_register.telefone);
+        str_field_freeing(&data_register.celular);
+        str_field_freeing(&data_register.email);
+        str_field_freeing(&data_register.endereco);
       }
       free(line);
       fclose(input_file);

@@ -11,20 +11,17 @@ time_t str_to_timestamp(string_t date, string_t format){
 
 string_t tokenizer(string_t string, string_t delimiters, int * control){
   string_t token = NULL;
-  small_t token_size;
+  small_t token_len;
   small_t count;
 
   if(*control == NONE)
     *control = 0;
-  for(count = 0; (*control < strlen(string)) && (strchr(delimiters,string[*control]) == NULL); (*control)++){
-    if(count == 0)
-      token =(string_t) malloc(sizeof(char));
-    token_size = strlen(token);
+  for(count = 0; (*control < strlen(string)) && (strchr(delimiters, string[*control]) == NULL); (*control)++){
+    token_len = count == 0 ? sizeof(char) : strlen(token);
+    token = (string_t) realloc(token,(int)token_len + sizeof(char));
     token[(int)count] = string[*control];
-    if(realloc(token,token_size + 1)){
-      token[count + 1] = '\0';
-      count++;
-    }
+    token[strlen(token)] = '\0';
+    count++;
   }
   (*control)++;
   return token;

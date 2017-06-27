@@ -1,5 +1,6 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
+#define MALLOC_CHECK_ 3
 #define _XOPEN_SOURCE //Para poder usar a função strptimeq:qq
 #include <time.h>
 #include <string.h>

@@ -10,9 +10,13 @@
 #define INPUT_FILE_PATH "sample/input.txt"
 #define DATE_FORMAT "%d/%m/%Y"
 
-// Constantes de mapeamento
-#define DATA_MAPPING 0
-#define SIZE_MAPPING 1
+// Modos de Abertura de Arquivos
+#define INPUT_FILE_OPEN_MODE "r"
+#define BINARY_DATA_CREATION_MODE "w"
+
+// Deslocamento entre posição dos campos no arquivo de entrada e vetor de tamanhos
+#define NOME_OFFSET -1
+#define OTHERS_OFFSET -3
 
 // Quantidade de campos do arquivo de inicialização
 #define NUMBER_FIELDS 10
@@ -20,7 +24,6 @@
 #define NUMBER_OF_STRING_FIELDS 7 // Existem 7 campos do tipo string
 
 // Campos do Arquivo de Inicialização
-
 #define MATRICULA 0 // Tamanho Fixo, Obrigatório
 #define NOME      1 // Tamanho Variável, Obrigatório // dado 0, tamanho 0
 #define SEXO      2 // Tamanho Fixo, Obrigatório
@@ -69,16 +72,19 @@ typedef struct binary_data_register {
 
 } binary_data_register;
 
-//Função para mapear os índices de um vetor nos campos do registro do arquivo de dados binário ou no vetor de tamanhos variáveis
-int mapping_function(small_t source, small_t mapping_type);
+// Atribui o tamanho total do registro
+boolean_t total_register_size_filling(binary_data_register * data_register);
 
-//Função que realiza o mapeamento entre o vetor e os registros do arquivo de dados binário
-boolean_t data_mapping(string_t ** str_fields, binary_data_register * data_register);
+// 'Freeing' dos campos do tipos string
+boolean_t str_field_freeing(string_t * field);
 
-//Armazena um token lido do arquivo de entrada de acordo com o campo ao qual corresponde (mapeamento)
-boolean_t store(string_t token, small_t position, string_t ** mapping, binary_data_register * data_register);
+// Preenchimento de campos do tipos string
+boolean_t str_field_filling(string_t token, string_t * field, small_t * size);
 
-//Carrega o arquivo de entradas, gerando o arquivo de dados e de índice
+// Preenche adequadamente o campo do registro de acordo com o token lido
+boolean_t register_filling(string_t token, small_t position, binary_data_register * data_register);
+
+// Carrega o arquivo de entradas, gerando o arquivo de dados e de índice
 boolean_t load_input_file(string_t path_input_file, FILE * data_file, FILE * index_file);
 
 #endif

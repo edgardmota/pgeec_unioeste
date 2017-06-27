@@ -24,3 +24,13 @@ telefone: char */[0,13] bytes;
 celular: char */[0,14] bytes;
 e-mail: char */0-127 bytes;
 **** ARQUIVO DE INDICE ****
+
+
+94 13 11 0 13 0 18 429 M '871835128-65' 15630171844 '00760 Almo Terrace' 'Janos Deabill' '8.789.441-4' 0x0 '05-63104-4710' 0x0
+
+  sexo: 1
+  cpf: 12
+  endereco: 18
+  nome: 13
+  rg: 11
+  celular = 13
