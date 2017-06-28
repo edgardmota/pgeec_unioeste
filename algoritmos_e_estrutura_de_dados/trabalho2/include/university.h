@@ -8,7 +8,10 @@
 // Constantes Gerais
 #define INPUT_FILE_DELIMITERS ";\n"
 #define INPUT_FILE_PATH "sample/input.txt"
+#define DATA_FILE "data.db"
+#define INDEX_FILE "index.db"
 #define DATE_FORMAT "%d/%m/%Y"
+#define BYTE_OFFSET_0 0 // deslocamento de 0 bytes, inválido e não-negativo
 
 // Modos de Abertura de Arquivos
 #define INPUT_FILE_OPEN_MODE "r"
@@ -50,6 +53,7 @@ typedef struct binary_data_header {
 // Estrutura de Registros do Arquivo de Dados Binário
 typedef struct binary_data_register {
 
+  //************************************* TAMANHO FIXO ************************************************************
   // Tamanhos
   data_register_size_t register_size; // Tamanho do registro, capaz de comportar o tamanho máximo teórico de 435 bytes
   small_t variable_field_size[NUMBER_OF_VARIABLE_SIZE_FIELDS];  // Tamanhos dos registros de tamanho variável
@@ -60,10 +64,11 @@ typedef struct binary_data_register {
   string_t cpf;
   time_t data_nascimento; //Armazeado como timestamp
 
+  // ************************************* TAMANHO VARIÁVEL *******************************************************
   // Campos Obrigatórios de Tamanho Variável
-  string_t endereco;
   string_t nome;
   string_t rg;
+  string_t endereco;
 
   // Campos Opcionais de Tamanho Variável
   string_t telefone;
@@ -71,6 +76,9 @@ typedef struct binary_data_register {
   string_t email;
 
 } binary_data_register;
+
+//Escreve um registro no arquivo de dados
+boolean_t write_to_data_file(binary_data_register * data_register, FILE *data_file);
 
 // Atribui o tamanho total do registro
 boolean_t total_register_size_filling(binary_data_register * data_register);

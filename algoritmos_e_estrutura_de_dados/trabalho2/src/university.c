@@ -1,5 +1,34 @@
 #include "university.h"
 
+boolean_t write_to_data_file(binary_data_register * data_register, FILE * data_file){
+  binary_data_header header;
+
+  if(!data_file){
+    data_file = fopen(DATA_FILE,BINARY_DATA_CREATION_MODE);
+    header.free_head_register = BYTE_OFFSET_0;
+    header.fragmentation_ratio = 0;
+    fwrite(&header,sizeof(header),1,data_file);
+  }
+
+  // Escrita dos campos de tamanho fixo
+  fwrite(&data_register->register_size,sizeof(data_register->register_size),1,data_file);
+  fwrite(&data_register->variable_field_size,sizeof(data_register->variable_field_size),1,data_file);
+  fwrite(&data_register->matricula,sizeof(data_register->matricula),1,data_file);
+  fwrite(&data_register->sexo,sizeof(data_register->sexo),1,data_file);
+  fwrite(data_register->cpf,strlen(data_register->cpf),1,data_file);
+  fwrite(&data_register->data_nascimento,sizeof(data_register->data_nascimento),1,data_file);
+
+  // Escrita dos campos de tamanho variável
+  fwrite(data_register->nome,data_register->variable_field_size[NOME + NOME_OFFSET],1,data_file);
+  fwrite(data_register->rg,data_register->variable_field_size[RG + OTHERS_OFFSET],1,data_file);
+  fwrite(data_register->endereco,data_register->variable_field_size[ENDERECO + OTHERS_OFFSET],1,data_file);
+  fwrite(data_register->telefone,data_register->variable_field_size[TELEFONE + OTHERS_OFFSET],1,data_file);
+  fwrite(data_register->celular,data_register->variable_field_size[CELULAR + OTHERS_OFFSET],1,data_file);
+  fwrite(data_register->email,data_register->variable_field_size[EMAIL + OTHERS_OFFSET],1,data_file);
+
+  return TRUE;
+}
+
 boolean_t str_field_filling(string_t token, string_t * field, small_t * size){
   if(size)
     *size = token ? strlen(token): 0;
@@ -24,7 +53,6 @@ boolean_t total_register_size_filling(binary_data_register * data_register){
   register_size += sizeof(data_register->matricula);
   register_size += sizeof(data_register->sexo);
   register_size += strlen(data_register->cpf);
-  register_size += sizeof(data_register->data_nascimento);
   register_size += sizeof(data_register->data_nascimento);
 
   // Campos de Tamanho variável
@@ -102,6 +130,7 @@ boolean_t load_input_file(string_t path_input_file, FILE * data_file, FILE * ind
           register_filling(token,position,&data_register);
         }
         total_register_size_filling(&data_register);
+        write_to_data_file(&data_register,data_file);
         str_field_freeing(&data_register.nome);
         str_field_freeing(&data_register.cpf);
         str_field_freeing(&data_register.rg);
@@ -111,6 +140,7 @@ boolean_t load_input_file(string_t path_input_file, FILE * data_file, FILE * ind
         str_field_freeing(&data_register.endereco);
       }
       free(line);
+      //fclose(data_file);
       fclose(input_file);
       return TRUE;
     }
