@@ -501,7 +501,7 @@ Sala * sala_usada(int ra, Lista * ocupadas, int liberar){
   int posicao = 0;
   Sala * sala = NULL;
 
-  atual = ocupadas->cabeca->proximo;
+  atual = topo(ocupadas);
   while((atual != NULL) && (((Sala *)(atual->conteudo))->ra != ra)){
     atual = atual->proximo;
     posicao++;
@@ -563,10 +563,10 @@ void imprimir_mapa_de_estantes(Lista * estantes){
   printf("\n------------------------------------\n");
   while(cursor_estantes){
     printf("[E%d]:\n",estante);
-    cursor_prateleiras = get(0,cursor_estantes->conteudo);
+    cursor_prateleiras = topo(cursor_estantes->conteudo);
     while(cursor_prateleiras){
       printf("\t[P%d]:\n",prateleira);
-      cursor_livros = get(0,cursor_prateleiras->conteudo);
+      cursor_livros = topo(cursor_prateleiras->conteudo);
       while(cursor_livros){
         livro = (Livro *) cursor_livros->conteudo;
         printf("\t\t[%d/%s/%s]\n",livro->codigo,livro->titulo,livro->autor);
@@ -589,7 +589,7 @@ void imprimir_fila_de_espera_de_sala(Salas * salas){
   Livro * livro;
 
   printf("\n------------------------------------\nFila (%d): \n\n",salas->fila->tamanho);
-  cursor_emprestimos = get(0,salas->fila);
+  cursor_emprestimos = topo(salas->fila);
   while(cursor_emprestimos){
     emprestimo = (Emprestimo *) cursor_emprestimos->conteudo;
     livro = emprestimo->livro;
@@ -610,12 +610,12 @@ void imprimir_mapa_de_salas(Salas * salas){
   printf("Salas ocupadas (%d):\n\n",salas->ocupadas->tamanho);
   int n_sala = 0;
 
-  cursor_salas = get(0,salas->ocupadas);
+  cursor_salas = topo(salas->ocupadas);
   while(cursor_salas){
     printf("\t[%d]:\n",n_sala);
     sala = (Sala *) cursor_salas->conteudo;
     printf("\t\tRA: %d\n",sala->ra);
-    cursor_livros = get(0,sala->pilha);
+    cursor_livros = topo(sala->pilha);
     while(cursor_livros){
       livro = (Livro *) cursor_livros->conteudo;
       printf("\t\t\t[%d/%s/%s]\n",livro->codigo,livro->titulo,livro->autor);

@@ -2,7 +2,6 @@
 #define _UNIVERSITY_H_
 #define _POSIX_C_SOURCE 200809L //Necessário para uso da função getline da stdio
 #include "common.h"
-#include <stdio.h>
 #include <math.h>
 
 // Constantes Gerais
@@ -38,15 +37,9 @@
 #define ENDERECO  8 // Tamanho Variável, Obrigatório // dado 6, tamanho 5
 #define DATA_NASC 9 // Tamanho Fixo, Obrigatório
 
-// Estrutura de Dados utilizada pela Árvore B
-typedef struct data {
-  unsigned short matricula;
-  byte_pointer_t pointer;
-} DATA;
-
 // Estrutura de Cabeçalho do Arquivo de Dados Binário
 typedef struct binary_data_header {
-  byte_pointer_t free_head_register;  // Ponteiro para cabeça da lista de registros vazios
+  byte_offset_t free_head_register;  // Ponteiro para cabeça da lista de registros vazios
   small_t fragmentation_ratio; // Taxa de fragmentação externa do arquivo
 } binary_data_header;
 
@@ -77,8 +70,8 @@ typedef struct binary_data_register {
 
 } binary_data_register;
 
-//Escreve um registro no arquivo de dados
-boolean_t write_to_data_file(binary_data_register * data_register, FILE *data_file);
+//Escreve um registro no arquivo de dados e no arquivo de índice
+boolean_t write_to_disk(binary_data_register * data_register, FILE ** data_file, FILE ** index_file);
 
 // Atribui o tamanho total do registro
 boolean_t total_register_size_filling(binary_data_register * data_register);
@@ -93,6 +86,6 @@ boolean_t str_field_filling(string_t token, string_t * field, small_t * size);
 boolean_t register_filling(string_t token, small_t position, binary_data_register * data_register);
 
 // Carrega o arquivo de entradas, gerando o arquivo de dados e de índice
-boolean_t load_input_file(string_t path_input_file, FILE * data_file, FILE * index_file);
+boolean_t load_input_file(string_t path_input_file, FILE ** data_file, FILE ** index_file);
 
 #endif
