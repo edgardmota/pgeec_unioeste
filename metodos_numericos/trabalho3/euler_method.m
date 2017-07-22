@@ -21,10 +21,6 @@ function [xi, yi] = euler_method(f,x0_y0,h_xn)
   end
 end
 
-function r = almost_equal(x,y)
-  r = (abs(x-y) < 10^-5);
-end
-
 function s = get_size(X)
   s = size(X,2);
 end
