@@ -1,6 +1,6 @@
 pkg load symbolic;
 
-function [xi, yi] = heun_method(f,x0_y0,h_xn,i)
+function [xi, yi] = halston_method(f,x0_y0,h_xn)
   h = h_xn(1);
   xn = h_xn(2);
   x0 = x0_y0(1);
@@ -8,19 +8,17 @@ function [xi, yi] = heun_method(f,x0_y0,h_xn,i)
 
   x = x0;
   y = y0;
-  y_new = y0;
+
   yi = [];
   xi = [];
   while(x <= xn)
-    n = i;
     xi = vertcat(xi,[x]);
     yi = vertcat(yi,[y]);
 
-    y_new = y + function_handle(f)(x,y)*h;
-    while(n)
-      y_new = y + (function_handle(f)(x,y) + function_handle(f)(x+h,y_new))/2*h;
-      n -= 1;
-    end
+    k1 = function_handle(f)(x,y);
+    k2 = function_handle(f)(x + 3/4*h,y + 3/4*k1*h);
+
+    y_new = y + (1/3*k1 + 2/3*k2)*h;
     x += h;
     y = y_new;
   end
@@ -43,14 +41,8 @@ function x0_y0 = get_initial_values
   x0_y0(2) = input('Entre com o valor de y0: ');
 end
 
-function i = get_interations
-  i = input("\nEntre com o nº de interações: ");
-end
-
-
 f = get_f;
 x0_y0 = get_initial_values;
 h_xn = get_step_xn;
-i = get_interations;
-[xi, yi] = heun_method(f,x0_y0,h_xn,i);
+[xi, yi] = halston_method(f,x0_y0,h_xn);
 disp("\nOs valores são: "),disp(horzcat(xi, yi));

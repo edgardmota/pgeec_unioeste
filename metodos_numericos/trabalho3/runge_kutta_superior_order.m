@@ -1,6 +1,6 @@
 pkg load symbolic;
 
-function [xi, yi] = heun_method(f,x0_y0,h_xn,i)
+function [xi, yi] = runge_kutta_superior_order(f,x0_y0,h_xn)
   h = h_xn(1);
   xn = h_xn(2);
   x0 = x0_y0(1);
@@ -8,19 +8,21 @@ function [xi, yi] = heun_method(f,x0_y0,h_xn,i)
 
   x = x0;
   y = y0;
-  y_new = y0;
+
   yi = [];
   xi = [];
   while(x <= xn)
-    n = i;
     xi = vertcat(xi,[x]);
     yi = vertcat(yi,[y]);
 
-    y_new = y + function_handle(f)(x,y)*h;
-    while(n)
-      y_new = y + (function_handle(f)(x,y) + function_handle(f)(x+h,y_new))/2*h;
-      n -= 1;
-    end
+    k1 = function_handle(f)(x,y);
+    k2 = function_handle(f)(x + h/4,y + k1*h/4);
+    k3 = function_handle(f)(x + h/4,y + k1*h/8 + k2*h/8);
+    k4 = function_handle(f)(x + h/2,y - 1/2*k2*h + k3*h);
+    k5 = function_handle(f)(x + 3/4*h, y + 3/16*k1*h + 9/16*k4*h);
+    k6 = function_handle(f)(x + h, y - 3/7*k1*h + 2/7*k2*h + 12/7*k3*h - 12/7*k4*h + 8/8*k5*h);
+
+    y_new = y + 1/90*(7*k1 + 32*k3 + 12*k4 + 32*k5 + 7*k6)*h;
     x += h;
     y = y_new;
   end
@@ -43,14 +45,8 @@ function x0_y0 = get_initial_values
   x0_y0(2) = input('Entre com o valor de y0: ');
 end
 
-function i = get_interations
-  i = input("\nEntre com o nº de interações: ");
-end
-
-
 f = get_f;
 x0_y0 = get_initial_values;
 h_xn = get_step_xn;
-i = get_interations;
-[xi, yi] = heun_method(f,x0_y0,h_xn,i);
+[xi, yi] = runge_kutta_superior_order(f,x0_y0,h_xn);
 disp("\nOs valores são: "),disp(horzcat(xi, yi));

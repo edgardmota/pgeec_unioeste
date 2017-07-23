@@ -8,7 +8,7 @@ function [xi, yi] = euler_method(f,x0_y0,h_xn)
 
   x = x0;
   y = y0;
-  y_new = y0;
+
   yi = [];
   xi = [];
   while(x <= xn)
@@ -19,10 +19,6 @@ function [xi, yi] = euler_method(f,x0_y0,h_xn)
     x += h;
     y = y_new;
   end
-end
-
-function s = get_size(X)
-  s = size(X,2);
 end
 
 function f = get_f
