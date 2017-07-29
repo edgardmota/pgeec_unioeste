@@ -43,12 +43,6 @@ function M4 = calc_M4(f,ab)
   end
 end
 
-% function m = subintervals(e_sr,f,ab)
-%   b = ab(2);
-%   a = ab(1);
-%   m = (b-a)/sqrt(12*e_sr/((b-a)*calc_M2(f,ab)));
-% end
-
 function h = calc_h(e_sr,f,ab)
   b = ab(2);
   a = ab(1);

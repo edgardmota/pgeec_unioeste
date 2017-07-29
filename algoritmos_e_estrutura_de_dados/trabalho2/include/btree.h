@@ -4,6 +4,10 @@
 
 #define B_TREE_ORDER 5
 
+// Índices do vetor de modificações de buffer
+#define B_TREE_HEADER_MODIFICATION    0
+#define B_TREE_REGISTER_MODIFICATION  1
+
 // Estrutura de Dados utilizada pela Árvore B
 typedef struct data {
   unsigned short matricula;
@@ -26,9 +30,18 @@ typedef struct binary_index_register {
   byte_offset_t child[B_TREE_ORDER + 1]; //Ponteiros para filhos
 } binary_index_register;
 
-//Inserção na árvore B
-boolean_t b_tree_insert(DATA * data, FILE ** index_file);
+typedef struct b_tree_t {
+  FILE * file;
+  boolean_t modification[2];
+  binary_index_header * in_memory_header;
+  binary_index_register * handled_register;
+  byte_offset_t flush_offset;
+} b_tree_t;
 
+//Inserção na árvore B
+boolean_t b_tree_insert(DATA * data, b_tree_t ** index_file);
+
+//Criação de um dado da árvore B
 DATA * create_btree_data(unsigned short matricula, byte_offset_t byte_offset);
 
 #endif

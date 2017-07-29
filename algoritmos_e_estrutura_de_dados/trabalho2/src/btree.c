@@ -1,8 +1,8 @@
 #include "btree.h"
 
-boolean_t b_tree_insert(DATA * data, FILE ** index_file){
-    printf("%hu: %llu\n",data->matricula,data->byte_offset);
-    return TRUE;
+boolean_t b_tree_insert(DATA * data, b_tree_t ** index_file){
+  printf("%hu: %llu\n",data->matricula,data->byte_offset);
+  return TRUE;
 }
 
 DATA * create_btree_data(unsigned short matricula, byte_offset_t byte_offset){

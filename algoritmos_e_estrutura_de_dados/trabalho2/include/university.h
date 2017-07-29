@@ -2,6 +2,7 @@
 #define _UNIVERSITY_H_
 #define _POSIX_C_SOURCE 200809L //Necessário para uso da função getline da stdio
 #include "common.h"
+#include "btree.h"
 #include <math.h>
 
 // Constantes Gerais
@@ -15,6 +16,10 @@
 // Modos de Abertura de Arquivos
 #define INPUT_FILE_OPEN_MODE "r"
 #define BINARY_DATA_CREATION_MODE "w"
+
+// Índices do vetor de modificações de buffer
+#define DATA_FILE_HEADER_MODIFICATION    0
+#define DATA_FILE_REGISTER_MODIFICATION  1
 
 // Deslocamento entre posição dos campos no arquivo de entrada e vetor de tamanhos
 #define NOME_OFFSET -1
@@ -70,8 +75,43 @@ typedef struct binary_data_register {
 
 } binary_data_register;
 
-//Escreve um registro no arquivo de dados e no arquivo de índice
-boolean_t write_to_disk(binary_data_register * data_register, FILE ** data_file, FILE ** index_file);
+typedef struct data_file_t {
+  FILE * file;
+  boolean_t modification[2];
+  binary_data_header * in_memory_header;
+  binary_data_register * handled_register;
+  byte_offset_t flush_offset;
+} data_file_t;
+
+// Copia um registro do arquivo de dados para outro em memória
+boolean_t data_file_copy_register(binary_data_register * destination, binary_data_register * source);
+
+// Libera a estrutura que representa o arquivo de dados em memória
+boolean_t data_file_close(data_file_t ** data_file);
+
+// Faz o flush de registros que tenham sido modificados apenas em memória para o arquivo de dados
+boolean_t data_file_register_flush(data_file_t ** data_file);
+
+// Cria a estrutura em memória que representa um arquivo de dados
+data_file_t * create_data_file(string_t path, string_t creation_mode);
+
+// Altera no header em memória o ponteiro a taxa de fragmentação do arquivo de dados
+boolean_t data_file_set_fragmentation_ratio(small_t fragmentation_ratio, data_file_t ** data_file);
+
+// Altera no header em memória o ponteiro para a lista de registros livres do arquivo de dados
+boolean_t data_file_set_free_head_register(byte_offset_t free_head_register, data_file_t ** data_file);
+
+// Faz o flush pro disco de um header de arquivo de dados modificado em memória mas ainda não persistido
+boolean_t data_file_header_flush(data_file_t ** data_file);
+
+// Escrita no arquivo de dados propriamente dita
+byte_offset_t data_file_register_write(binary_data_register * data_register, data_file_t ** data_file);
+
+// Empurra registros que ainda estejam em memória para o disco caso os mesmo ainda não tenham sido escritos
+byte_offset_t data_file_register_push(binary_data_register * data_register, data_file_t ** data_file);
+
+// Insere um registro no arquivo de dados e no arquivo de índice
+boolean_t data_file_insert(binary_data_register * data_register, data_file_t ** data_file, b_tree_t ** index_file);
 
 // Atribui o tamanho total do registro
 boolean_t total_register_size_filling(binary_data_register * data_register);
@@ -86,6 +126,6 @@ boolean_t str_field_filling(string_t token, string_t * field, small_t * size);
 boolean_t register_filling(string_t token, small_t position, binary_data_register * data_register);
 
 // Carrega o arquivo de entradas, gerando o arquivo de dados e de índice
-boolean_t load_input_file(string_t path_input_file, FILE ** data_file, FILE ** index_file);
+boolean_t load_input_file(string_t path_input_file, data_file_t ** data_file, b_tree_t ** index_file);
 
 #endif
