@@ -8,14 +8,7 @@
 // Constantes Gerais
 #define INPUT_FILE_DELIMITERS ";\n"
 #define INPUT_FILE_PATH "sample/input.txt"
-#define DATA_FILE "data.db"
-#define INDEX_FILE "index.db"
 #define DATE_FORMAT "%d/%m/%Y"
-#define BYTE_OFFSET_0 0 // deslocamento de 0 bytes, inválido e não-negativo
-
-// Modos de Abertura de Arquivos
-#define INPUT_FILE_OPEN_MODE "r"
-#define BINARY_DATA_CREATION_MODE "w"
 
 // Índices do vetor de modificações de buffer
 #define DATA_FILE_HEADER_MODIFICATION    0
@@ -41,6 +34,9 @@
 #define EMAIL     7 // Tamanho Variável, Opcional // dado 5, tamanho 4
 #define ENDERECO  8 // Tamanho Variável, Obrigatório // dado 6, tamanho 5
 #define DATA_NASC 9 // Tamanho Fixo, Obrigatório
+
+//Tamanho fixo do campo CPF
+#define CPF_SIZE  12
 
 // Estrutura de Cabeçalho do Arquivo de Dados Binário
 typedef struct binary_data_header {
@@ -83,8 +79,14 @@ typedef struct data_file_t {
   byte_offset_t flush_offset;
 } data_file_t;
 
+//Exibe um registro de dados
+boolean_t data_file_show_register(data_file_t ** data_file);
+
+// Carrega para memória um registro de dados utilizando-se do índice da árvore B
+boolean_t data_file_load_register(unsigned short matricula, data_file_t ** data_file, b_tree_t ** index_file);
+
 // Copia um registro do arquivo de dados para outro em memória
-boolean_t data_file_copy_register(binary_data_register * destination, binary_data_register * source);
+boolean_t data_file_copy_register(data_file_t ** data_file, binary_data_register * source);
 
 // Libera a estrutura que representa o arquivo de dados em memória
 boolean_t data_file_close(data_file_t ** data_file);
@@ -105,7 +107,7 @@ boolean_t data_file_set_free_head_register(byte_offset_t free_head_register, dat
 boolean_t data_file_header_flush(data_file_t ** data_file);
 
 // Escrita no arquivo de dados propriamente dita
-byte_offset_t data_file_register_write(binary_data_register * data_register, data_file_t ** data_file);
+byte_offset_t data_file_register_write(data_file_t ** data_file);
 
 // Empurra registros que ainda estejam em memória para o disco caso os mesmo ainda não tenham sido escritos
 byte_offset_t data_file_register_push(binary_data_register * data_register, data_file_t ** data_file);

@@ -15,12 +15,23 @@ typedef unsigned long long byte_offset_t; // Tamanho do Maior Arquivo de Dados P
 typedef unsigned short data_register_size_t;
 typedef unsigned char boolean_t;
 
+//Tamanho da String de Data
+#define DATA_SIZE  10
+
 //Constantes Gerais
 #define NONE -1
 
 // Constantes Booleanas
 #define TRUE 1
 #define FALSE 0
+
+// Nomes de Arquivos
+#define DATA_FILE "data.db"
+#define B_TREE_FILE "index.db"
+
+// Modos de Abertura de Arquivos
+#define INPUT_FILE_OPEN_MODE "r"
+#define BINARY_DATA_CREATION_MODE "w+b"
 
 // Nó da lista de nós vazios
 typedef struct empty_node {
